@@ -14,3 +14,7 @@ class Config:
     }
     
     generationAmount = 10
+    
+    #OptimizerParameters
+    bufferLimit = 100000
+    batchSize = 32

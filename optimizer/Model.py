@@ -1,5 +1,7 @@
+from this import d
 import torch.nn as nn
 import torch.nn.functional as F
+import torch
 
 class DQNModel(nn.Module):
     def __init__(self, actionSpace, observationSpace):
@@ -16,10 +18,21 @@ class DQNModel(nn.Module):
         
     def forward(self, input):
         flattenLayer = self.flatten(input)
+        # print(flattenLayer.shape)
         dense1 = F.relu(self.fc1(flattenLayer))
+        # print(dense1.shape)
         dense2 = F.relu(self.fc2(dense1))
+        # print(dense2.shape)
         dense3 = F.relu(self.fc3(dense2))
+        # print(dense3.shape)
         output = self.fc4(dense3)
-        prob = F.softmax(output)
+        # print(output)
         
-        return prob
+        return output
+    
+
+if __name__ == "__main__":
+    inputMatrix = torch.rand([10, 2, 13, 13])
+    model = DQNModel(3, [2, 13,13])
+    output = model(inputMatrix)
+    print(output)
