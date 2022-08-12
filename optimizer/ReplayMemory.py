@@ -6,7 +6,7 @@ from config import Config
 
 class Memory:
     def __init__(self) -> None:
-        self.buffer = deque(amxlen=Config.bufferLimit)
+        self.buffer = deque(maxlen=Config.bufferLimit)
         
     def add(self, transition):
         self.buffer.add(transition)

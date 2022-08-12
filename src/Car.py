@@ -9,14 +9,17 @@ class Car:
     coverRange = Config.coverRange
     observationRange = 2 * Config.coverRange
     
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y, agent) -> None:
         self.x = x
         self.y = y
+        self.agent = agent
         self.velocity = random.randint(Config.minVelocity, Config.maxVelocity)
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
+        self.reward = 0
+        self.nextObservation = np.zeros([2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         
-    def setObservation(self, coverMap, carMap):
+    def createObservation(self, coverMap, carMap):
         copyCarMap = copy(carMap)
         copyCarMap[self.x, self.y] = 3
         paddedCoverMap = np.pad(coverMap, self.observationRange, constant_values=-1)
@@ -25,9 +28,15 @@ class Car:
         coverObservation = paddedCoverMap[self.x: self.x + 2 * self.observationRange + 1, self.y: self.y + 2 * self.observationRange + 1]
         carPosObservation = paddedCarMap[self.x: self.x + 2 * self.observationRange + 1, self.y: self.y + 2 * self.observationRange + 1]
         
-        self.observation = np.stack([coverObservation, carPosObservation])
+        return np.stack([coverObservation, carPosObservation])
+    
+    def setObservation(self, coverMap, carMap):
+        self.observation = self.createObservation(coverMap, carMap)
         
-        
+    def setNextObservation(self, coverMap, carMap):
+        self.nextObservation = self.createObservation(coverMap, carMap)
+    
+    
     def turnOn(self):
         self.state = Config.action["ON"]
     
@@ -37,11 +46,10 @@ class Car:
     def run(self):
         self.x = self.x + self.velocity
     
-    def action(self, server):
-        print(f'Car {self.x} - {self.y} observation: ')
-        print(self.observation[0])
-        print(self.observation[1])
-        print('\n')
+    def action(self, server, epsilon):
+        
+        # * For random action:
+        
         prob = abs(random.gauss(0, 1))
         
         if prob > 0.5:
@@ -53,3 +61,14 @@ class Car:
         else:
             self.turnOff()
             print(f'Car at {self.x} - {self.y} turns off')
+            
+        '''
+        action = self.agent.getAction(self.observation, epsilon)
+        
+        if action == 1:
+            self.turnOn()
+            package = Package(self.x, self.y)
+            server.updateSentPackages(package)
+        else :
+            self.turnOff()
+        '''

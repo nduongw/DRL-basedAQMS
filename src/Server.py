@@ -1,4 +1,4 @@
-class Server:
+class GNBServer:
     def __init__(self) -> None:
         self.totalSentPackages = 0
         self.packagesList = []

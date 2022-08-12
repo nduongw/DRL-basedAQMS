@@ -1,14 +1,13 @@
-from xmlrpc.client import Server
 import numpy as np
 import random
 from PIL import Image
 
 from config import Config
 from src.Car import Car
-from src.Server import Server
+from optimizer.RewardFunction import calculateReward
 
 class Map:
-    def __init__(self) -> None:
+    def __init__(self, agent, server) -> None:
         self.mapWidth = Config.mapWidth
         self.mapHeight = Config.mapHeight
         self.carList = []
@@ -16,9 +15,10 @@ class Map:
         self.carPosMap = np.zeros([self.mapHeight, self.mapWidth])
         self.unCoverPeriod = Config.unCoverPeriod
         self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
-        self.server = Server()
+        self.server = server
+        self.agent = agent
         
-    def run(self):
+    def run(self, epsilon):
         print('Car map:')
         print(self.carPosMap)
         print('\n')
@@ -26,13 +26,16 @@ class Map:
         print(self.coverMap)
         print('\n')
         for car in self.carList:
-            car.action(self.server)
+            car.setObservation(self.coverMap, self.carPosMap)
+        
+        for car in self.carList:
+            car.action(self.server, epsilon)
         
         self.updateCoverMap()
-        
+        self.calcReward()
         
         for _ in range(self.unCoverPeriod):
-            self.coverMap -= 0.1
+            self.coverMap -= Config.decayRate
             self.coverMap = np.where(self.coverMap > 0, self.coverMap, 0)
             
             for car in self.carList:
@@ -47,11 +50,14 @@ class Map:
             
         print(f'Total sent packages: {self.server.getTotalPackages()}')
         
+        for car in self.carList:
+            car.setNextObservation(self.coverMap, self.carPosMap)
+        
     def generateCar(self):
         addedCarAmount = random.randint(0, Config.generationAmount)
         
         for _ in range(addedCarAmount):
-            addedCar = Car(random.randint(0, Config.maxVelocity), random.randint(0, self.mapWidth - 1))
+            addedCar = Car(random.randint(0, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent)
             addedCar.setObservation(self.coverMap, self.carPosMap)
             self.carList.append(addedCar)
         
@@ -77,7 +83,7 @@ class Map:
         for car in self.carList:
             if car.state == Config.action["ON"]:
                 self.setCover(car.x, car.y)
-            
+        
         self.coverMap = np.where(self.rewardMap > 1, 1, self.coverMap)
         print('Reward map')
         print(self.rewardMap)
@@ -93,6 +99,10 @@ class Map:
                 
     def addCar(self, car):
         self.carList.append(car)
+        
+    def calcReward(self):
+        for car in self.carList:
+            calculateReward(car)
     
     def showCarMap(self, time):
         # simg = np.stack((self.carPosMap, self.carPosMap, self.carPosMap), axis=0)

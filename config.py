@@ -1,4 +1,5 @@
 class Config:
+    #MapParameters
     mapWidth = 10
     mapHeight = 10
     unCoverPeriod = 5
@@ -14,7 +15,11 @@ class Config:
     }
     
     generationAmount = 10
+    decayRate = 0.2
     
     #OptimizerParameters
     bufferLimit = 100000
     batchSize = 32
+    gamma = 0.98
+    learningRate = 0.0005
+    obsShape = [2, 13, 13]
