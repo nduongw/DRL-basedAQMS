@@ -1,4 +1,5 @@
 import torch.nn as nn
+import torch
 import random
 from config import Config
 
@@ -7,21 +8,31 @@ class Agent:
         self.model = model
         self.optimizer = optimizer
         self.memory = memory
+        self.lossFunction = nn.MSELoss()
             
     def train(self):
+        totalLoss = 0
         for _ in range(10):
             s, a, r, sPrime = self.memory.sample()
+            # print(s.shape)
             
             output = self.model(s)
-            actualQ = output.gather(1, a)
+            # print(output.shape)
+            # print(a)
+            actualQ = output.gather(1, a.type(torch.int64))
             maxQPrime = self.model((sPrime)).max(1)[0].unsqueeze(1)
             targetQ = r + Config.gamma * maxQPrime
             
-            loss = nn.MSELoss(targetQ, actualQ)
+            print(actualQ.shape, targetQ.shape)
+            
+            loss = self.lossFunction(targetQ, actualQ)
             
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            
+            totalLoss += loss
+            print(f'Loss: {totalLoss / 10}')
             
     def getAction(self, observation, epsilon):
         qOut = self.model(observation)

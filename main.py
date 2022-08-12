@@ -19,13 +19,14 @@ agent = Agent(model, optimizer, memory)
 server = GNBServer()
 map = Map(agent, server)
 
-for i in range(10):
+for i in range(10000):
+    print(f'\nRun {i}')
     epsilon = max(0.01, 0.08 - 0.01 * (i / 200))
     
     map.run(epsilon)
     
-    # for car in map.carList:
-    #     memory.add([car.observation, car.state, car.reward, car.nextObservation])
+    for car in map.carList:
+        memory.add([car.observation, car.state, car.reward, car.nextObservation])
     
-    # if memory.size > 3000:
-    #     agent.train()
+    if memory.size() > 3000:
+        agent.train()

@@ -9,7 +9,7 @@ class Memory:
         self.buffer = deque(maxlen=Config.bufferLimit)
         
     def add(self, transition):
-        self.buffer.add(transition)
+        self.buffer.append(transition)
         
     def sample(self):
         miniBatch = random.sample(self.buffer, Config.batchSize)
@@ -22,10 +22,10 @@ class Memory:
             rLst.append([r])
             sPrimeLst.append([sPrime])
             
-        return torch.tensor(sLst, dtype=torch.float32), \
-                torch.tensor(aLst, dtype=torch.float32), \
-                torch.tensor(rLst, dtype=torch.float32), \
-                torch.tensor(sPrimeLst, dtype=torch.float32)
+        return torch.tensor(sLst, dtype=torch.float), \
+                torch.tensor(aLst, dtype=torch.float), \
+                torch.tensor(rLst, dtype=torch.float), \
+                torch.tensor(sPrimeLst, dtype=torch.float)
     
     def size(self):
         return len(self.buffer)
