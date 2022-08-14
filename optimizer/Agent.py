@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 import random
 from config import Config
+from utils.TensorBoardUtils import *
 
 class Agent:
     def __init__(self, model, optimizer, memory, device) -> None:
@@ -11,7 +12,7 @@ class Agent:
         self.lossFunction = nn.MSELoss()
         self.device = device    
             
-    def train(self):
+    def train(self, index, writer):
         totalLoss = 0
         for _ in range(10):
             s, a, r, sPrime = self.memory.sample()
@@ -28,8 +29,10 @@ class Agent:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            weight_histograms(writer, index, self.model)
             
             totalLoss += loss
+        writer.add_scalar("Loss", totalLoss, index)
         print(f'Loss: {totalLoss / 10}')
             
     def getAction(self, observation, epsilon):

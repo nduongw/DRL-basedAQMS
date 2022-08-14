@@ -23,3 +23,6 @@ class Config:
     gamma = 0.98
     learningRate = 0.0005
     obsShape = [2, 13, 13]
+    
+    #logs
+    storePath = 'runs/experiment1'

@@ -36,7 +36,9 @@ class Car:
     def setNextObservation(self, coverMap, carMap):
         self.nextObservation = self.createObservation(coverMap, carMap)
     
-    
+    def setReward(self, reward):
+        self.reward = reward
+        
     def turnOn(self):
         self.state = Config.action["ON"]
     
