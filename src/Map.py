@@ -1,3 +1,4 @@
+from asyncore import write
 import numpy as np
 import random
 from PIL import Image
@@ -30,17 +31,17 @@ class Map:
         print('\n')
         '''
         for car in self.carList:
-            # print(f'Car at {car.x}-{car.y}\'s obervation')
             car.setObservation(self.coverMap, self.carPosMap)
-            # print(car.observation)
-            # print('------\n')
             
         for car in self.carList:
             car.action(self.server, epsilon)
         
         previousCoverMap = np.copy(self.coverMap)
         self.updateCoverMap()
+        writer.add_image('Cover map', self.coverMap, 0, 'HW')
         totalReward = self.calcReward()
+        writer.add_image('Reward map', self.rewardMap, 0, 'HW')
+        
         '''
         print('Cover map after cars do action: ')
         print(self.coverMap)
@@ -76,7 +77,7 @@ class Map:
             self.generateCar()
             self.removeInvalidCar()
             self.updateCarPosition()
-            
+            writer.add_image('Car position map', self.carPosMap, 0, 'HW')
         
         for car in self.carList:
             car.setNextObservation(self.coverMap, self.carPosMap)

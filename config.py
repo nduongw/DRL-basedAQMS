@@ -25,4 +25,4 @@ class Config:
     obsShape = [2, 13, 13]
     
     #logs
-    storePath = 'runs/experiment1'
+    storePath = 'runs/15-8-00:06'

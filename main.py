@@ -22,8 +22,6 @@ agent = Agent(model, optimizer, memory, device)
 server = GNBServer()
 map = Map(agent, server)
 
-writer.add_graph(model)
-
 for i in range(10000):
     epsilon = max(0.01, 0.08 - 0.01 * (i / 200))
     
