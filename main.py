@@ -11,22 +11,25 @@ from config import Config
 from src.Map import Map
 from src.Server import GNBServer
 
-model = DQNModel(2, Config.obsShape)
-memory = Memory()
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+model = DQNModel(2, Config.obsShape, device).to(device)
+memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
-agent = Agent(model, optimizer, memory)
+agent = Agent(model, optimizer, memory, device)
 
 server = GNBServer()
 map = Map(agent, server)
 
+
 for i in range(10000):
-    print(f'\nRun {i}')
+    # print(f'\nRun {i}')
     epsilon = max(0.01, 0.08 - 0.01 * (i / 200))
     
     map.run(epsilon)
     
     for car in map.carList:
-        memory.add([car.observation, car.state, car.reward, car.nextObservation])
+        memory.add([car.observation / 10, car.state, car.reward, car.nextObservation])
     
     if memory.size() > 3000:
         agent.train()

@@ -5,8 +5,9 @@ import torch
 from config import Config
 
 class Memory:
-    def __init__(self) -> None:
+    def __init__(self, device) -> None:
         self.buffer = deque(maxlen=Config.bufferLimit)
+        self.device = device
         
     def add(self, transition):
         self.buffer.append(transition)
@@ -22,10 +23,10 @@ class Memory:
             rLst.append([r])
             sPrimeLst.append([sPrime])
             
-        return torch.tensor(sLst, dtype=torch.float), \
-                torch.tensor(aLst, dtype=torch.float), \
-                torch.tensor(rLst, dtype=torch.float), \
-                torch.tensor(sPrimeLst, dtype=torch.float)
+        return torch.tensor(sLst, dtype=torch.float).to(self.device), \
+                torch.tensor(aLst, dtype=torch.float).to(self.device), \
+                torch.tensor(rLst, dtype=torch.float).to(self.device), \
+                torch.tensor(sPrimeLst, dtype=torch.float).to(self.device)
     
     def size(self):
         return len(self.buffer)

@@ -3,9 +3,10 @@ import torch.nn.functional as F
 import torch
 
 class DQNModel(nn.Module):
-    def __init__(self, actionSpace, observationSpace):
+    def __init__(self, actionSpace, observationSpace, device):
         super().__init__()
         
+        self.device = device
         self.actionSpace = actionSpace
         self.observationSpace = observationSpace
         
@@ -15,9 +16,10 @@ class DQNModel(nn.Module):
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, self.actionSpace)
         
-    def forward(self, input):
-        flattenLayer = self.flatten(input)
-        # print(flattenLayer.shape)
+    def forward(self, obs):
+        # print('Flatten dimension', flattenDim)
+        # print('Input shape: ', obs.shape)
+        flattenLayer = self.flatten(obs)
         dense1 = F.relu(self.fc1(flattenLayer))
         # print(dense1.shape)
         dense2 = F.relu(self.fc2(dense1))
@@ -31,7 +33,7 @@ class DQNModel(nn.Module):
     
 
 if __name__ == "__main__":
-    inputMatrix = torch.rand([10, 2, 13, 13])
+    inputMatrix = torch.rand([2, 13, 13])
     model = DQNModel(3, [2, 13,13])
-    output = model(inputMatrix)
+    output = model(inputMatrix, 0)
     print(output)

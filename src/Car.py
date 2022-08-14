@@ -47,7 +47,7 @@ class Car:
         self.x = self.x + self.velocity
     
     def action(self, server, epsilon):
-        
+        '''
         # * For random action:
         
         prob = abs(random.gauss(0, 1))
@@ -71,4 +71,4 @@ class Car:
             server.updateSentPackages(package)
         else :
             self.turnOff()
-        '''
+        

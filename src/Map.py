@@ -20,7 +20,7 @@ class Map:
         
     def run(self, epsilon):
         self.resetRewardMap()
-        
+        '''
         print('Car map:')
         print(self.carPosMap)
         print('\n')
@@ -28,19 +28,19 @@ class Map:
         print(self.coverMap)
         print('---------------------------------')
         print('\n')
-        
+        '''
         for car in self.carList:
-            print(f'Car at {car.x}-{car.y}\'s obervation')
+            # print(f'Car at {car.x}-{car.y}\'s obervation')
             car.setObservation(self.coverMap, self.carPosMap)
-            print(car.observation)
-            print('------\n')
+            # print(car.observation)
+            # print('------\n')
             
         for car in self.carList:
             car.action(self.server, epsilon)
         
         self.updateCoverMap()
         self.calcReward()
-        
+        '''
         print('Cover map after cars do action: ')
         print(self.coverMap)
         print('\n')
@@ -48,7 +48,7 @@ class Map:
         print(self.rewardMap)
         print('-----------------------------------')
         print('\n')
-        
+        '''
         for _ in range(self.unCoverPeriod):
             self.coverMap -= Config.decayRate
             self.coverMap = np.where(self.coverMap > 0, self.coverMap, 0)
@@ -60,8 +60,8 @@ class Map:
             self.removeInvalidCar()
             self.updateCarPosition()
             
-        print(f'Cover rate: {self.calcCoverRate()}')
-        print(f'Total sent packages: {self.server.getTotalPackages()}')
+        # print(f'Cover rate: {self.calcCoverRate()}')
+        # print(f'Total sent packages: {self.server.getTotalPackages()}')
         
         for car in self.carList:
             car.setNextObservation(self.coverMap, self.carPosMap)
