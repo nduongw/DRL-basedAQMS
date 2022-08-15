@@ -29,7 +29,7 @@ class Agent:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            weight_histograms(writer, index, self.model)
+            # weight_histograms(writer, index, self.model)
             
             totalLoss += loss
         writer.add_scalar("Loss", totalLoss, index)

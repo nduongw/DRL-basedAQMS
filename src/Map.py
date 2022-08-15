@@ -38,9 +38,9 @@ class Map:
         
         previousCoverMap = np.copy(self.coverMap)
         self.updateCoverMap()
-        writer.add_image('Cover map', self.coverMap, 0, 'HW')
+        writer.add_image('Cover map', self.coverMap, 0, dataformats='HW')
         totalReward = self.calcReward()
-        writer.add_image('Reward map', self.rewardMap, 0, 'HW')
+        writer.add_image('Reward map', self.rewardMap, 0, dataformats='HW')
         
         '''
         print('Cover map after cars do action: ')
@@ -60,7 +60,7 @@ class Map:
             print(f'Reward: {totalReward}')
             print('--------------------------------------------------------------\n')
             
-            writer.add_scalar('Cover rate', self.calcCoverRate, step)
+            writer.add_scalar('Cover rate', self.calcCoverRate(), step)
             writer.add_scalar('Overlap rate', self.calcOverlapRate(previousCoverMap), step)
             writer.add_scalar('Car overlap rate', self.calcCarOverlap(), step)
             writer.add_scalar('Number of car', len(self.carList), step)
@@ -77,7 +77,7 @@ class Map:
             self.generateCar()
             self.removeInvalidCar()
             self.updateCarPosition()
-            writer.add_image('Car position map', self.carPosMap, 0, 'HW')
+            writer.add_image('Car position map', self.carPosMap, 0, dataformats='HW')
         
         for car in self.carList:
             car.setNextObservation(self.coverMap, self.carPosMap)
