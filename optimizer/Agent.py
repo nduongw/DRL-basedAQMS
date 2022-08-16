@@ -16,6 +16,10 @@ class Agent:
         totalLoss = 0
         for _ in range(10):
             s, a, r, sPrime = self.memory.sample()
+            print(s.shape)
+            print(a.shape)
+            print(r.shape)
+            print(sPrime.shape)
             
             output = self.model(s)
             actualQ = output.gather(1, a.type(torch.int64))

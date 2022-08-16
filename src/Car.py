@@ -14,9 +14,9 @@ class Car:
         self.agent = agent
         self.velocity = random.randint(Config.minVelocity, Config.maxVelocity)
         self.state = Config.action["OFF"]
-        self.observation = np.zeros([2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
+        self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0
-        self.nextObservation = np.zeros([2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
+        self.nextObservation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         
     def createObservation(self, coverMap, carMap):
         copyCarMap = copy(carMap)

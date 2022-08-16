@@ -18,7 +18,7 @@ class Map:
         self.agent = agent
         self.time = 0
         
-    def run(self, epsilon, writer, step):
+    def run(self, epsilon, writer, memory, step):
         self.resetRewardMap()
         print('\nTime step', step)
         if len(self.carList) > 0:
@@ -33,19 +33,16 @@ class Map:
             previousCoverMap = np.copy(self.coverMap)
             self.updateCoverMap()
             
+            totalReward = self.calcReward()
+            
             for car in self.carList:
                 car.setNextObservation(self.coverMap, self.carPosMap)
-                # if car.state == Config.action["ON"]:
-                #     print(f'Car {car.x}-{car.y} observation at {step}')
-                #     print(car.observation[0])
-                #     print(f'Car {car.x}-{car.y} next observation at {step}')
-                #     print(car.nextObservation[0])
+                memory.add([car.observation / 255, car.state, car.reward / 10, car.nextObservation / 255])
             
             # for car in self.carList:
             #     writer.add_image(f'Car {car.x}-{car.y} observation at {step}', car.observation[0], 0, dataformats='HW')
             #     writer.add_image(f'Car {car.x}-{car.y} next observation at {step}', car.nextObservation[0], 0, dataformats='HW')
             
-            totalReward = self.calcReward()
             
             writer.add_image(f'Cover map-{step}', self.coverMap, 0, dataformats='HW')
             writer.add_image(f'Car map-{step}', self.carPosMap, 0, dataformats='HW')
