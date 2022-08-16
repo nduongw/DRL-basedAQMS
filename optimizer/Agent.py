@@ -33,7 +33,7 @@ class Agent:
             
             totalLoss += loss
         writer.add_scalar("Loss", totalLoss, index)
-        print(f'Loss: {totalLoss / 10}')
+        # print(f'Loss: {totalLoss / 10}')
             
     def getAction(self, observation, epsilon):
         observation = torch.from_numpy(observation).type(torch.float).to(self.device).unsqueeze(0)

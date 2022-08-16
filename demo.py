@@ -4,12 +4,15 @@ import torch.nn as nn
 import numpy as np
 import torch
 
-writer = SummaryWriter('runs/plot_model_graph')
-img = np.ones([100, 50])
-for i in range(50):
-    img[i, i] = 0
-    img[2 * i, i] = 166
-writer.add_image('Image', img, 0, dataformats='HW')
+# writer = SummaryWriter('runs/plot_padded_img')
+# img = np.ones([100, 50])
+# paded_img = np.pad(img, 4, constant_values=192)
+# writer.add_image('Padded img', paded_img, dataformats='HW')
+
+a = np.array([[1, 1, 1],
+              [1, 1, 1],
+              [1, 1, 1]])
+print(a.sum())
 
 # class DQNModel(nn.Module):
 #     def __init__(self, actionSpace, observationSpace, device):
@@ -43,5 +46,5 @@ writer.add_image('Image', img, 0, dataformats='HW')
 # model = DQNModel(2, 338, 'cpu')
 # inputShape = torch.rand([1, 2, 13, 13])
 # writer.add_graph(model, inputShape)
-writer.close()
+# writer.close()
     

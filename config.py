@@ -2,20 +2,19 @@ class Config:
     #MapParameters
     mapWidth = 50
     mapHeight = 100
-    unCoverPeriod = 2
+    unCoverPeriod = 5
     
     state_size = 10
     action_size = 2
     minVelocity = 1
-    maxVelocity = 3
+    maxVelocity = 5
     coverRange = 3
     action = {
         "ON": 1,
         "OFF": 0
     }
     
-    generationAmount = 3
-    decayRate = 0.2
+    generationAmount = 5
     
     #OptimizerParameters
     bufferLimit = 100000
@@ -25,4 +24,4 @@ class Config:
     obsShape = [2, 13, 13]
     
     #logs
-    storePath = 'runs/15-8-00:06'
+    storePath = 'runs/x90'

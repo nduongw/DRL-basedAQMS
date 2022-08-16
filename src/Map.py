@@ -1,7 +1,5 @@
-from asyncore import write
 import numpy as np
 import random
-from PIL import Image
 
 from config import Config
 from src.Car import Car
@@ -18,40 +16,41 @@ class Map:
         self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
         self.server = server
         self.agent = agent
+        self.time = 0
         
     def run(self, epsilon, writer, step):
         self.resetRewardMap()
-        '''
-        print('Car map:')
-        print(self.carPosMap)
-        print('\n')
-        print('Cover map before cars do action:')
-        print(self.coverMap)
-        print('---------------------------------')
-        print('\n')
-        '''
-        for car in self.carList:
-            car.setObservation(self.coverMap, self.carPosMap)
+        print('\nTime step', step)
+        if len(self.carList) > 0:
+            for car in self.carList:
+                car.setObservation(self.coverMap, self.carPosMap)
+                
+            for car in self.carList:
+                car.action(self.server, epsilon)
+                if car.state == Config.action["ON"]:
+                    print(f'Car {car.x}-{car.y} sends a package')
+                    
+            previousCoverMap = np.copy(self.coverMap)
+            self.updateCoverMap()
             
-        for car in self.carList:
-            car.action(self.server, epsilon)
+            for car in self.carList:
+                car.setNextObservation(self.coverMap, self.carPosMap)
+                # if car.state == Config.action["ON"]:
+                #     print(f'Car {car.x}-{car.y} observation at {step}')
+                #     print(car.observation[0])
+                #     print(f'Car {car.x}-{car.y} next observation at {step}')
+                #     print(car.nextObservation[0])
+            
+            # for car in self.carList:
+            #     writer.add_image(f'Car {car.x}-{car.y} observation at {step}', car.observation[0], 0, dataformats='HW')
+            #     writer.add_image(f'Car {car.x}-{car.y} next observation at {step}', car.nextObservation[0], 0, dataformats='HW')
+            
+            totalReward = self.calcReward()
+            
+            writer.add_image(f'Cover map-{step}', self.coverMap, 0, dataformats='HW')
+            writer.add_image(f'Car map-{step}', self.carPosMap, 0, dataformats='HW')
+            writer.add_image(f'Reward map-{step}', self.rewardMap, 0, dataformats='HW')
         
-        previousCoverMap = np.copy(self.coverMap)
-        self.updateCoverMap()
-        writer.add_image('Cover map', self.coverMap, 0, dataformats='HW')
-        totalReward = self.calcReward()
-        writer.add_image('Reward map', self.rewardMap, 0, dataformats='HW')
-        
-        '''
-        print('Cover map after cars do action: ')
-        print(self.coverMap)
-        print('\n')
-        print('Reward map:')
-        print(self.rewardMap)
-        print('-----------------------------------')
-        print('\n')
-        '''
-        if len(self.carList) != 0:
             print(f'Cover rate: {self.calcCoverRate()}')
             print(f'Overlap rate: {self.calcOverlapRate(previousCoverMap)}')
             print(f'Car overlap rate: {self.calcCarOverlap()}')
@@ -67,20 +66,20 @@ class Map:
             writer.add_scalar('Sending rate', self.countOnCar(), step)
             writer.add_scalar('Reward', totalReward, step)
             
-        for _ in range(self.unCoverPeriod):
-            self.coverMap -= Config.decayRate
-            self.coverMap = np.where(self.coverMap > 0, self.coverMap, 0)
-            
             for car in self.carList:
                 car.run()
-            
-            self.generateCar()
-            self.removeInvalidCar()
-            self.updateCarPosition()
-            writer.add_image('Car position map', self.carPosMap, 0, dataformats='HW')
+        else:
+            print('Map has not cars')
         
-        for car in self.carList:
-            car.setNextObservation(self.coverMap, self.carPosMap)
+        if self.time % self.unCoverPeriod == 0:
+            self.coverMap -= 1
+            self.coverMap = np.where(self.coverMap > 0, self.coverMap, 0)
+              
+        self.generateCar()
+        self.removeInvalidCar()
+        self.updateCarPosition()
+        # writer.add_image(f'Car position map-{step}', self.carPosMap, 0, dataformats='HW')
+        self.time += 1
         
     def generateCar(self):
         addedCarAmount = random.randint(0, Config.generationAmount)
@@ -110,14 +109,14 @@ class Map:
         for car in self.carList:
             if car.state == Config.action["ON"]:
                 self.setCover(car.x, car.y)
-        
-        self.coverMap = np.where(self.rewardMap > 1, 1, self.coverMap)
+        print('Reward map', self.rewardMap.sum())
+        self.coverMap = np.where(self.rewardMap >= 1, 1, self.coverMap)
+        print('Cover map', self.coverMap.sum())
         
     def setCover(self, x, y):
         for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
             for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
                 self.rewardMap[i, j] += 1
-        self.coverMap = np.where(self.rewardMap >= 1, 1, self.coverMap)
                 
     def addCar(self, car):
         self.carList.append(car)
@@ -126,6 +125,7 @@ class Map:
         totalReward = 0
         for car in self.carList:
             reward = calculateReward(car, self.rewardMap)
+            print(f'Car-{car.x}-{car.y} reward: {reward}')
             car.setReward(reward)
             totalReward += reward
 
@@ -146,12 +146,13 @@ class Map:
         return count
     
     def calcOverlapRate(self, previousCoverMap):
-        overlap = np.where(previousCoverMap * self.coverMap > 0 , 0, 1).sum()
+        overlap = np.where(previousCoverMap * self.rewardMap > 0 , 1, 0).sum()
         overlap /= (Config.mapHeight * Config.mapWidth)
         return overlap
 
     def calcCarOverlap(self):
-        overlap = np.where(self.rewardMap > 1, self.rewardMap - 1, 0).sum()
+        overlapMap = self.rewardMap - 1
+        overlap = np.where(overlapMap > 0, overlapMap, 0).sum()
         overlap /= self.countOnCar() * (Config.coverRange * 2 + 1)        
         return overlap
         
@@ -168,3 +169,8 @@ class Map:
         print('Cover map')
         print(self.coverMap)
         # print(coverimg)
+    
+    def set_seed(self, seed):
+        np.random.seed(seed)
+        for car in self.carList:
+            car.set_seed(seed)

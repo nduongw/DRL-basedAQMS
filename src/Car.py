@@ -4,7 +4,6 @@ from copy import copy
 from config import Config
 from src.Package import Package
 
-
 class Car:
     coverRange = Config.coverRange
     observationRange = 2 * Config.coverRange
@@ -21,9 +20,9 @@ class Car:
         
     def createObservation(self, coverMap, carMap):
         copyCarMap = copy(carMap)
-        copyCarMap[self.x, self.y] = 3
-        paddedCoverMap = np.pad(coverMap, self.observationRange, constant_values=-1)
-        paddedCarMap = np.pad(copyCarMap, self.observationRange, constant_values=-1)
+        copyCarMap[self.x, self.y] = 106
+        paddedCoverMap = np.pad(coverMap, self.observationRange, constant_values=192)
+        paddedCarMap = np.pad(copyCarMap, self.observationRange, constant_values=192)
         
         coverObservation = paddedCoverMap[self.x: self.x + 2 * self.observationRange + 1, self.y: self.y + 2 * self.observationRange + 1]
         carPosObservation = paddedCarMap[self.x: self.x + 2 * self.observationRange + 1, self.y: self.y + 2 * self.observationRange + 1]
@@ -73,4 +72,11 @@ class Car:
             server.updateSentPackages(package)
         else :
             self.turnOff()
-        
+            
+    def set_seed(self, seed):
+        np.random.seed(seed)
+
+if __name__ == '__main__':
+    car = Car(98, 98, None)
+    car.setObservation()
+    
