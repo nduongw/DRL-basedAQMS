@@ -20,15 +20,15 @@ class Map:
         
     def run(self, epsilon, writer, memory, step):
         self.resetRewardMap()
-        print('\nTime step', step)
+        # print('\nTime step', step)
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
                 
             for car in self.carList:
                 car.action(self.server, epsilon)
-                if car.state == Config.action["ON"]:
-                    print(f'Car {car.x}-{car.y} sends a package')
+                # if car.state == Config.action["ON"]:
+                    # print(f'Car {car.x}-{car.y} sends a package')
                     
             previousCoverMap = np.copy(self.coverMap)
             self.updateCoverMap()
@@ -48,13 +48,13 @@ class Map:
             writer.add_image(f'Car map-{step}', self.carPosMap, 0, dataformats='HW')
             writer.add_image(f'Reward map-{step}', self.rewardMap, 0, dataformats='HW')
         
-            print(f'Cover rate: {self.calcCoverRate()}')
-            print(f'Overlap rate: {self.calcOverlapRate(previousCoverMap)}')
-            print(f'Car overlap rate: {self.calcCarOverlap()}')
-            print(f'Sending packages rate: {self.countOnCar() / len(self.carList)}')
-            print(f'Total sent packages: {self.server.getTotalPackages()}')
-            print(f'Reward: {totalReward}')
-            print('--------------------------------------------------------------\n')
+            # print(f'Cover rate: {self.calcCoverRate()}')
+            # print(f'Overlap rate: {self.calcOverlapRate(previousCoverMap)}')
+            # print(f'Car overlap rate: {self.calcCarOverlap()}')
+            # print(f'Sending packages rate: {self.countOnCar() / len(self.carList)}')
+            # print(f'Total sent packages: {self.server.getTotalPackages()}')
+            # print(f'Reward: {totalReward}')
+            # print('--------------------------------------------------------------\n')
             
             writer.add_scalar('Cover rate', self.calcCoverRate(), step)
             writer.add_scalar('Overlap rate', self.calcOverlapRate(previousCoverMap), step)
@@ -106,9 +106,7 @@ class Map:
         for car in self.carList:
             if car.state == Config.action["ON"]:
                 self.setCover(car.x, car.y)
-        print('Reward map', self.rewardMap.sum())
         self.coverMap = np.where(self.rewardMap >= 1, 1, self.coverMap)
-        print('Cover map', self.coverMap.sum())
         
     def setCover(self, x, y):
         for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
@@ -122,7 +120,6 @@ class Map:
         totalReward = 0
         for car in self.carList:
             reward = calculateReward(car, self.rewardMap)
-            print(f'Car-{car.x}-{car.y} reward: {reward}')
             car.setReward(reward)
             totalReward += reward
 

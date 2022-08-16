@@ -28,15 +28,15 @@ server = GNBServer()
 map = Map(agent, server)
 map.set_seed(42)
 
-for i in range(10000):
-    epsilon = max(0.01, 0.08 - 0.01 * (i / 200))
+for i in range(100000):
+    epsilon = max(0.01, 0.1 - 0.01 * (i / 400))
     
     map.run(epsilon, writer, memory, i)
     
-    if memory.size() > 1000:
+    if memory.size() > 3000:
         agent.train(i, writer)
     
     if i % 50 == 0 and i != 0:
-        print('Memory size: {memory.size()}')
-    
+        print(f'Step: {i}: Memory size: {memory.size()} - Epsilon : {epsilon}')
+
 writer.close()

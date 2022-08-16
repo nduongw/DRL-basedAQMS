@@ -17,17 +17,11 @@ class DQNModel(nn.Module):
         self.fc4 = nn.Linear(64, self.actionSpace)
         
     def forward(self, obs):
-        # print('Flatten dimension', flattenDim)
-        # print('Input shape: ', obs.shape)
         flattenLayer = self.flatten(obs)
         dense1 = F.relu(self.fc1(flattenLayer))
-        # print(dense1.shape)
         dense2 = F.relu(self.fc2(dense1))
-        # print(dense2.shape)
         dense3 = F.relu(self.fc3(dense2))
-        # print(dense3.shape)
         output = self.fc4(dense3)
-        # print(output)
         
         return output
     

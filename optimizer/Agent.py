@@ -16,28 +16,20 @@ class Agent:
         totalLoss = 0
         for _ in range(10):
             s, a, r, sPrime = self.memory.sample()
-            print(s.shape)
-            print(a.shape)
-            print(r.shape)
-            print(sPrime.shape)
             
             output = self.model(s)
             actualQ = output.gather(1, a.type(torch.int64))
             maxQPrime = self.model((sPrime)).max(1)[0].unsqueeze(1)
             targetQ = r + Config.gamma * maxQPrime
             
-            # print(actualQ.shape, targetQ.shape)
-            
             loss = self.lossFunction(targetQ, actualQ)
             
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            # weight_histograms(writer, index, self.model)
             
             totalLoss += loss
-        writer.add_scalar("Loss", totalLoss, index)
-        # print(f'Loss: {totalLoss / 10}')
+        writer.add_scalar("Loss", totalLoss / 10, index)
             
     def getAction(self, observation, epsilon):
         observation = torch.from_numpy(observation).type(torch.float).to(self.device).unsqueeze(0)

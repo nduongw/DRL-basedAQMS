@@ -17,7 +17,7 @@ class Config:
     generationAmount = 5
     
     #OptimizerParameters
-    bufferLimit = 100000
+    bufferLimit = 1000000
     batchSize = 32
     gamma = 0.98
     learningRate = 0.0005

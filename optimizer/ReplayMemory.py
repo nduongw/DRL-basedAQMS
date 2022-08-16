@@ -21,7 +21,7 @@ class Memory:
             sLst.append(s)
             aLst.append([a])
             rLst.append([r])
-            sPrimeLst.append([sPrime])
+            sPrimeLst.append(sPrime)
             
         return torch.tensor(sLst, dtype=torch.float).to(self.device), \
                 torch.tensor(aLst, dtype=torch.float).to(self.device), \
