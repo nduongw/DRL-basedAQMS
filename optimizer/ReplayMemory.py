@@ -1,6 +1,7 @@
 from collections import deque
 import random
 import torch
+import numpy as np
 
 from config import Config
 
@@ -18,15 +19,15 @@ class Memory:
         
         for transition in miniBatch:
             s, a, r, sPrime = transition
-            sLst.append(s)
+            sLst.append(s / 255.0)
             aLst.append([a])
             rLst.append([r])
-            sPrimeLst.append(sPrime)
+            sPrimeLst.append(sPrime / 255.0)
             
-        return torch.tensor(sLst, dtype=torch.float).to(self.device), \
-                torch.tensor(aLst, dtype=torch.float).to(self.device), \
-                torch.tensor(rLst, dtype=torch.float).to(self.device), \
-                torch.tensor(sPrimeLst, dtype=torch.float).to(self.device)
+        return torch.tensor(np.array(sLst), dtype=torch.float).to(self.device), \
+                torch.tensor(np.array(aLst), dtype=torch.float).to(self.device), \
+                torch.tensor(np.array(rLst), dtype=torch.float).to(self.device), \
+                torch.tensor(np.array(sPrimeLst), dtype=torch.float).to(self.device)
     
     def size(self):
         return len(self.buffer)

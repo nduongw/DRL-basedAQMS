@@ -3,6 +3,8 @@ import torch
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 import argparse
+import time
+from tqdm import tqdm
 
 from optimizer.Model import DQNModel
 from optimizer.ReplayMemory import Memory
@@ -28,15 +30,24 @@ server = GNBServer()
 map = Map(agent, server)
 map.set_seed(42)
 
-for i in range(100000):
-    epsilon = max(0.01, 0.1 - 0.01 * (i / 400))
+for i in range(10000):
+    print(f'Step: {i + 1}')
+    epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
     
-    map.run(epsilon, writer, memory, i)
+    for j in tqdm(range(100)):
+        map.run(epsilon, writer, memory, j)
+        # time.sleep(120)
+    
+    print(f'Memory size: {memory.size()}')
+    writer.add_scalar('Reward', map.reward, i)
+    
+    map.resetMap()
     
     if memory.size() > 3000:
         agent.train(i, writer)
     
-    if i % 50 == 0 and i != 0:
+    if i % 10 == 0 and i != 0:
         print(f'Step: {i}: Memory size: {memory.size()} - Epsilon : {epsilon}')
 
+    writer.add_scalar('Epsilon', epsilon, i)
 writer.close()

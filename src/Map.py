@@ -17,6 +17,7 @@ class Map:
         self.server = server
         self.agent = agent
         self.time = 0
+        self.reward = 0
         
     def run(self, epsilon, writer, memory, step):
         self.resetRewardMap()
@@ -34,39 +35,31 @@ class Map:
             self.updateCoverMap()
             
             totalReward = self.calcReward()
+            self.reward += totalReward
             
             for car in self.carList:
                 car.setNextObservation(self.coverMap, self.carPosMap)
-                memory.add([car.observation / 255, car.state, car.reward / 10, car.nextObservation / 255])
+                memory.add([car.observation, car.state, car.reward / 10, car.nextObservation])
             
             # for car in self.carList:
             #     writer.add_image(f'Car {car.x}-{car.y} observation at {step}', car.observation[0], 0, dataformats='HW')
             #     writer.add_image(f'Car {car.x}-{car.y} next observation at {step}', car.nextObservation[0], 0, dataformats='HW')
             
             
-            writer.add_image(f'Cover map-{step}', self.coverMap, 0, dataformats='HW')
-            writer.add_image(f'Car map-{step}', self.carPosMap, 0, dataformats='HW')
-            writer.add_image(f'Reward map-{step}', self.rewardMap, 0, dataformats='HW')
-        
-            # print(f'Cover rate: {self.calcCoverRate()}')
-            # print(f'Overlap rate: {self.calcOverlapRate(previousCoverMap)}')
-            # print(f'Car overlap rate: {self.calcCarOverlap()}')
-            # print(f'Sending packages rate: {self.countOnCar() / len(self.carList)}')
-            # print(f'Total sent packages: {self.server.getTotalPackages()}')
-            # print(f'Reward: {totalReward}')
-            # print('--------------------------------------------------------------\n')
+            # writer.add_image(f'Cover map-{step}', self.coverMap, 0, dataformats='HW')
+            # writer.add_image(f'Car map-{step}', self.carPosMap, 0, dataformats='HW')
+            # writer.add_image(f'Reward map-{step}', self.rewardMap, 0, dataformats='HW')
             
-            writer.add_scalar('Cover rate', self.calcCoverRate(), step)
-            writer.add_scalar('Overlap rate', self.calcOverlapRate(previousCoverMap), step)
-            writer.add_scalar('Car overlap rate', self.calcCarOverlap(), step)
-            writer.add_scalar('Number of car', len(self.carList), step)
-            writer.add_scalar('Sending rate', self.countOnCar(), step)
-            writer.add_scalar('Reward', totalReward, step)
+            # writer.add_scalar('Cover rate', self.calcCoverRate(), step)
+            # writer.add_scalar('Overlap rate', self.calcOverlapRate(previousCoverMap), step)
+            # writer.add_scalar('Car overlap rate', self.calcCarOverlap(), step)
+            # writer.add_scalar('Number of car', len(self.carList), step)
+            # writer.add_scalar('Sending rate', self.countOnCar() / len(self.carList), step)
             
             for car in self.carList:
                 car.run()
-        else:
-            print('Map has not cars')
+        # else:
+            # print('Map has not cars')
         
         if self.time % self.unCoverPeriod == 0:
             self.coverMap -= 1
@@ -147,7 +140,7 @@ class Map:
     def calcCarOverlap(self):
         overlapMap = self.rewardMap - 1
         overlap = np.where(overlapMap > 0, overlapMap, 0).sum()
-        overlap /= self.countOnCar() * (Config.coverRange * 2 + 1)        
+        overlap /= (self.countOnCar() * (Config.coverRange * 2 + 1))        
         return overlap
         
     def showCarMap(self, time):
@@ -163,6 +156,15 @@ class Map:
         print('Cover map')
         print(self.coverMap)
         # print(coverimg)
+    
+    def resetMap(self):
+        self.carList = []
+        self.coverMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.carPosMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.time = 0
+        self.server.resetServer()
+        self.reward = 0
     
     def set_seed(self, seed):
         np.random.seed(seed)

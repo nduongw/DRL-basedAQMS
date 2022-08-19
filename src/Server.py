@@ -12,3 +12,7 @@ class GNBServer:
     
     def getTotalPackages(self):
         return self.totalSentPackages
+
+    def resetServer(self):
+        self.totalSentPackages = 0
+        self.packagesList = []
