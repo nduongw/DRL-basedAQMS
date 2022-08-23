@@ -2,6 +2,7 @@ from collections import deque
 import random
 import torch
 import numpy as np
+import torchvision.transforms as T
 
 from config import Config
 
@@ -19,16 +20,21 @@ class Memory:
         
         for transition in miniBatch:
             s, a, r, sPrime = transition
-            sLst.append(s / 255.0)
-            aLst.append([a])
-            rLst.append([r])
-            sPrimeLst.append(sPrime / 255.0)
+            s_t = T.Resize((13, 13))(torch.from_numpy(s)).numpy()
+            sPrime_t = T.Resize((13, 13))(torch.from_numpy(sPrime)).numpy()
             
-        return torch.tensor(np.array(sLst), dtype=torch.float).to(self.device), \
-                torch.tensor(np.array(aLst), dtype=torch.float).to(self.device), \
-                torch.tensor(np.array(rLst), dtype=torch.float).to(self.device), \
-                torch.tensor(np.array(sPrimeLst), dtype=torch.float).to(self.device)
-    
+            sLst.append(s_t / 255.0)
+            aLst.append([a])
+            rLst.append([np.clip(r, -1, 1)])
+            sPrimeLst.append(sPrime_t / 255.0)
+            
+            sTensor = torch.tensor(np.array(sLst), dtype=torch.float).to(self.device)
+            aTensor = torch.tensor(np.array(aLst), dtype=torch.float).to(self.device)
+            rTensor = torch.tensor(np.array(rLst), dtype=torch.float).to(self.device)
+            sPrimeTensor = torch.tensor(np.array(sPrimeLst), dtype=torch.float).to(self.device)
+            
+        return sTensor, aTensor, rTensor, sPrimeTensor
+        
     def size(self):
         return len(self.buffer)
                 

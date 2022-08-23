@@ -1,23 +1,23 @@
 class Config:
     #MapParameters
-    mapWidth = 50
-    mapHeight = 100
-    unCoverPeriod = 5
+    mapWidth = 100
+    mapHeight = 200
+    unCoverPeriod = 6
     
     state_size = 10
     action_size = 2
-    minVelocity = 1
-    maxVelocity = 5
-    coverRange = 3
+    minVelocity = 2
+    maxVelocity = 7
+    coverRange = 4
     action = {
         "ON": 1,
         "OFF": 0
     }
     
-    generationAmount = 5
+    generationAmount = 10
     
     #OptimizerParameters
-    bufferLimit = 10000000
+    bufferLimit = 5000000
     batchSize = 32
     gamma = 0.98
     learningRate = 0.00025

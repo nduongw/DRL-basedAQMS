@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
+import torchvision.transforms as T
 import torch
 import random
 from config import Config
@@ -16,7 +17,7 @@ class Agent:
     def train(self, index, writer):
         totalLoss = 0
         # print(self.memory.size()
-        for _ in range(20):
+        for _ in range(min(int(self.memory.size() / Config.batchSize), 50)):
             s, a, r, sPrime = self.memory.sample()
             
             output = self.model(s)
@@ -41,11 +42,13 @@ class Agent:
             self.optimizer.step()
             
             totalLoss += loss
-        writer.add_scalar("Loss", totalLoss / 20, index)
-        print(f'Loss; {totalLoss / 20}')
+        writer.add_scalar("Loss", totalLoss / min(int(self.memory.size() / Config.batchSize), 50), index)
+        return totalLoss / min(int(self.memory.size() / Config.batchSize), 50)
             
     def getAction(self, observation, epsilon):
-        observation = torch.from_numpy(observation).type(torch.float).to(self.device).unsqueeze(0)
+        observation = torch.from_numpy(observation)
+        observation = T.Resize((13, 13))(observation).type(torch.float).to(self.device).unsqueeze(0)
+
         qOut = self.model(observation)
         # print(qOut.is_cuda)
         coin = random.random()
