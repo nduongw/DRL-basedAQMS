@@ -12,7 +12,7 @@ class Car:
         self.x = x
         self.y = y
         self.agent = agent
-        self.velocity = random.randint(Config.minVelocity, Config.maxVelocity)
+        self.velocity = 3
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0
@@ -75,6 +75,7 @@ class Car:
             
     def set_seed(self, seed):
         np.random.seed(seed)
+        random.seed(seed)
 
 if __name__ == '__main__':
     car = Car(98, 98, None)

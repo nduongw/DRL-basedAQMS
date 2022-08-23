@@ -19,47 +19,46 @@ class Map:
         self.time = 0
         self.reward = 0
         
-    def run(self, epsilon, writer, memory, step):
+    def run(self, epsilon, writer, memory, step, isTest=False, testStep=0):
         self.resetRewardMap()
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
-                
+            
             for car in self.carList:
                 car.action(self.server, epsilon)
-                    
+            
             previousCoverMap = np.copy(self.coverMap)
             self.updateCoverMap()
             
             totalReward = self.calcReward()
             self.reward += totalReward
             
-            for car in self.carList:
-                car.setNextObservation(self.coverMap, self.carPosMap)
-                memory.add([car.observation, car.state, car.reward, car.nextObservation])
+            if isTest == False:
+                for car in self.carList:
+                    car.setNextObservation(self.coverMap, self.carPosMap)
+                    memory.add([car.observation, car.state, car.reward, car.nextObservation])
             
             # for car in self.carList:
             #     writer.add_image(f'Car {car.x}-{car.y} observation at {step}', car.observation[0], 0, dataformats='HW')
             #     writer.add_image(f'Car {car.x}-{car.y} next observation at {step}', car.nextObservation[0], 0, dataformats='HW')
             
-            if step % 100 == 0 and step > 0:
-                sampleList = random.sample(self.carList, 5)
-                for car in sampleList:
-                    writer.add_image(f'Cover map of car{car.x}-{car.y} at step:{step}', car.observation[0], 0, dataformats='HW')
-                    writer.add_image(f'Car position map of car{car.x}-{car.y} at step:{step}', car.observation[1], 0, dataformats='HW')
-                    writer.add_image(f'Next observation map of car{car.x}-{car.y} at step:{step}', car.nextObservation[0], 0, dataformats='HW')
-            
-            writer.add_scalar('Cover rate', self.calcCoverRate(), step)
-            writer.add_scalar('Overlap rate', self.calcOverlapRate(previousCoverMap), step)
-            writer.add_scalar('Car overlap rate', self.calcCarOverlap(), step)
-            writer.add_scalar('Number of car', len(self.carList), step)
-            writer.add_scalar('Sending rate', self.countOnCar() / len(self.carList), step)
-            writer.add_scalar('Reward', totalReward, step)
+            # if step % 100 == 0 and step > 0:
+            #     sampleList = random.sample(self.carList, 5)
+            #     for car in sampleList:
+            #         writer.add_image(f'Cover map of car{car.x}-{car.y} at step:{step}', car.observation[0], 0, dataformats='HW')
+            #         writer.add_image(f'Car position map of car{car.x}-{car.y} at step:{step}', car.observation[1], 0, dataformats='HW')
+            #         writer.add_image(f'Next observation map of car{car.x}-{car.y} at step:{step}', car.nextObservation[0], 0, dataformats='HW')
+
+            if testStep != 0 and isTest == True:
+                writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
+                writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap), step)
+                writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(), step)
+                writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
+                writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
             
             for car in self.carList:
                 car.run()
-        # else:
-            # print('Map has not cars')
         
         if self.time % self.unCoverPeriod == 0 and self.time != 0:
             self.coverMap -= 1
@@ -68,7 +67,7 @@ class Map:
         self.generateCar()
         self.removeInvalidCar()
         self.updateCarPosition()
-        # writer.add_image(f'Car position map-{step}', self.carPosMap, 0, dataformats='HW')
+
         self.time += 1
         
     def generateCar(self):
@@ -116,7 +115,7 @@ class Map:
             car.setReward(reward)
             totalReward += reward
 
-        totalReward /= len(self.carList)
+        # totalReward /= len(self.carList)
         return totalReward
 
     def resetRewardMap(self):
@@ -168,6 +167,7 @@ class Map:
         self.reward = 0
     
     def set_seed(self, seed):
+        random.seed(seed)
         np.random.seed(seed)
         for car in self.carList:
             car.set_seed(seed)
