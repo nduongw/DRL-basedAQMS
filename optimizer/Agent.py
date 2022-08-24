@@ -7,8 +7,9 @@ from config import Config
 from utils.TensorBoardUtils import *
 
 class Agent:
-    def __init__(self, model, optimizer, memory, device) -> None:
+    def __init__(self, model, target_model, optimizer, memory, device) -> None:
         self.model = model
+        self.target_model = target_model
         self.optimizer = optimizer
         self.memory = memory
         self.lossFunction = nn.MSELoss()
@@ -21,13 +22,9 @@ class Agent:
             s, a, r, sPrime = self.memory.sample()
             
             output = self.model(s)
-            # print('Output Q values:') 
-            # print(output)
             actualQ = output.gather(1, a.type(torch.int64))
-            # print('Actual Q: ') 
-            # print(actualQ)
-            # print('Output next Q')
-            maxQPrime = self.model((sPrime)).max(1)[0].unsqueeze(1)
+            argMaxQPrime = self.model(sPrime).argmax(dim=1, keepdim=True)
+            maxQPrime = self.target_model((sPrime)).gather(1, argMaxQPrime)
             
             # print('Max Q: ') 
             # print(maxQPrime)

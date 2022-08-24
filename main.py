@@ -16,7 +16,8 @@ from src.Server import GNBServer
 parser = argparse.ArgumentParser()
 parser.add_argument('--storepath', help='Location to store runs of tensorboard', required=True)
 parser.add_argument('--model', help='Dense or CNN model', required=True)
-parser.add_argument('--modelpath', help='Name of saved model state dict', required=True)
+parser.add_argument('--modelpath', help='Name of saved model state dict', required=False)
+parser.add_argument('--rewardfunc', help='Rerward version which you want to use', required=False)
 args = parser.parse_args()
 
 #seed for model parameters
@@ -31,12 +32,19 @@ modelList = {'DenseModel': DQNDenseModel(2, Config.obsShape, device),
 
 if args.model == 'dense':
     model = modelList['DenseModel'].to(device)
+    target_model = modelList['DenseModel'].to(device)
 elif args.model == 'cnn':
     model = modelList['CnnModel'].to(device)    
+    target_model = modelList['CnnModel'].to(device)
     
+target_model.load_state_dict(model.state_dict())
+
+# for testing model
+# model.load_state_dict(torch.load('model/dense-238d17h21-atStep6000.pt'))
+
 memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
-agent = Agent(model, optimizer, memory, device)
+agent = Agent(model, target_model, optimizer, memory, device)
 
 server = GNBServer()
 map = Map(agent, server)
@@ -45,18 +53,19 @@ map.set_seed(42)
 testMap.set_seed(42)
 testStep = 1
 
-def testModel(testMap, testStep):
-    print('Testing phase:\n')
+def testModel(testMap, testStep, step):
+    print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
     for i in tqdm(range(1000)):
         testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep)
     
-    writer.add_scalar('Reward', testMap.reward, testStep)
+    writer.add_scalar('Reward', testMap.reward / 1000, testStep)
     print(f'Reward of testing phase; {testMap.reward / 1000}')
     testStep += 1
         
 if __name__ == "__main__":
+    # '''
     for i in tqdm(range(50000)):
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
@@ -75,15 +84,18 @@ if __name__ == "__main__":
 
         #save model
         if i % 50 == 0 and i != 0:
-            if os.path.exist('model'):
-                torch.save(model.state_dict(), f'model/{args.model}-{args.modelpath}-atStep{i}')
+            agent.target_model.load_state_dict(agent.model.state_dict())
+            
+            if os.path.exists('model'):
+                torch.save(model.state_dict(), f'model/{args.model}-{args.modelpath}-atStep{i}.pth')
             else:
                 os.mkdir('model')
 
         #testing phase
         if i % 100 == 0:
-            testModel(testMap, testStep)
+            testModel(testMap, testStep, i)
             testStep += 1
-            
+    # '''
+    # testModel(testMap, testStep, 1)        
     
     writer.close()

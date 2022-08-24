@@ -22,6 +22,9 @@ def calculateReward(car, rewardMap):
         
     return reward
 
+def calculateReward_ver2(car, rewardMap):
+    pass
+
 if __name__ == "__main__":
     car = Car(22, 0, None)
     rewardMap = np.zeros(50, 50)

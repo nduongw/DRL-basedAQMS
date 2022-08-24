@@ -51,17 +51,15 @@ class Car:
         '''
         # * For random action:
         
-        prob = abs(random.gauss(0, 1))
+        prob = abs(random.uniform(0, 1))
         
-        if prob > 0.5:
+        if prob > 0.4:
             self.turnOn()
-            print(f'Car at {self.x} - {self.y} turns on')
             package = Package(self.x, self.y)
             server.updateSentPackages(package)
             
         else:
             self.turnOff()
-            print(f'Car at {self.x} - {self.y} turns off')
             
         '''
         action = self.agent.getAction(self.observation, epsilon)
@@ -72,7 +70,7 @@ class Car:
             server.updateSentPackages(package)
         else :
             self.turnOff()
-            
+        # ''' 
     def set_seed(self, seed):
         np.random.seed(seed)
         random.seed(seed)
