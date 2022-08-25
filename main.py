@@ -13,6 +13,12 @@ from config import Config
 from src.Map import Map
 from src.Server import GNBServer
 
+if not os.path.exists('models'):
+    os.mkdir('models')
+        
+if not os.path.exists('runs'):
+    os.mkdir('runs')
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--storepath',type=str, help='Location to store runs of tensorboard', required=True)
 parser.add_argument('--model',type=str, help='Dense or CNN model', required=True)
@@ -66,10 +72,6 @@ def testModel(testMap, testStep, step):
     return testMap.reward / 1000
         
 if __name__ == "__main__":
-    
-    if not os.path.exists('models'):
-        os.mkdir('models')
-                
     # '''
     for i in tqdm(range(50000)):
         bestReward = 0
