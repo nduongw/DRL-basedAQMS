@@ -3,21 +3,23 @@ import random
 
 from config import Config
 from src.Car import Car
-from optimizer.RewardFunction import calculateReward
+from optimizer.RewardFunction import *
 
 class Map:
-    def __init__(self, agent, server) -> None:
+    def __init__(self, agent, server, args) -> None:
         self.mapWidth = Config.mapWidth
         self.mapHeight = Config.mapHeight
         self.carList = []
         self.coverMap = np.zeros([self.mapHeight, self.mapWidth])
         self.carPosMap = np.zeros([self.mapHeight, self.mapWidth])
         self.unCoverPeriod = Config.unCoverPeriod
-        self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         self.server = server
         self.agent = agent
         self.time = 0
         self.reward = 0
+        self.args = args
         
     def run(self, epsilon, writer, memory, step, isTest=False, testStep=0):
         self.resetRewardMap()
@@ -31,7 +33,7 @@ class Map:
             previousCoverMap = np.copy(self.coverMap)
             self.updateCoverMap()
             
-            totalReward = self.calcReward()
+            totalReward = self.calcReward(previousCoverMap)
             self.reward += totalReward
             
             if isTest == False:
@@ -97,21 +99,34 @@ class Map:
     def updateCoverMap(self):
         for car in self.carList:
             if car.state == Config.action["ON"]:
-                self.setCover(car.x, car.y)
-        self.coverMap = np.where(self.rewardMap >= 1, 1, self.coverMap)
+                self.setOnCover(car.x, car.y)
+            else:
+                self.setOffCover(car.x, car.y)
+        self.coverMap = np.where(self.onRewardMap >= 1, 1, self.coverMap)
         
-    def setCover(self, x, y):
+    def setOnCover(self, x, y):
         for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
             for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
-                self.rewardMap[i, j] += 1
+                self.onRewardMap[i, j] += 1
+    
+    def setOffCover(self, x, y):
+        for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
+            for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
+                self.offRewardMap[i, j] += 1
                 
     def addCar(self, car):
         self.carList.append(car)
         
-    def calcReward(self):
+    def calcReward(self, previousCoverMap):
         totalReward = 0
         for car in self.carList:
-            reward = calculateReward(car, self.rewardMap)
+            if self.args.rewardfunc == 'ver1':
+                reward = calculateReward(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver2':
+                reward = calculateReward2(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver3':
+                reward = calculateReward3(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            
             car.setReward(reward)
             totalReward += reward
 
@@ -119,7 +134,8 @@ class Map:
         return totalReward
 
     def resetRewardMap(self):
-        self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
     
     def calcCoverRate(self):
         coverRate = self.coverMap.sum() / (self.mapHeight * self.mapWidth)
@@ -133,12 +149,12 @@ class Map:
         return count
     
     def calcOverlapRate(self, previousCoverMap):
-        overlap = np.where(previousCoverMap * self.rewardMap > 0 , 1, 0).sum()
+        overlap = np.where(previousCoverMap * self.onRewardMap > 0 , 1, 0).sum()
         overlap /= (Config.mapHeight * Config.mapWidth)
         return overlap
 
     def calcCarOverlap(self):
-        overlapMap = self.rewardMap - 1
+        overlapMap = self.onRewardMap - 1
         overlap = np.where(overlapMap > 0, overlapMap, 0).sum()
         overlap /= (self.countOnCar() * (Config.coverRange * 2 + 1))        
         return overlap
@@ -161,7 +177,8 @@ class Map:
         self.carList = []
         self.coverMap = np.zeros([self.mapHeight, self.mapWidth])
         self.carPosMap = np.zeros([self.mapHeight, self.mapWidth])
-        self.rewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        self.offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         self.time = 0
         self.server.resetServer()
         self.reward = 0

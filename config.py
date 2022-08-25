@@ -17,10 +17,10 @@ class Config:
     generationAmount = 5
     
     #OptimizerParameters
-    bufferLimit = 5000000
+    bufferLimit = 3000000
     batchSize = 32
     gamma = 0.98
-    learningRate = 0.0005
+    learningRate = 0.0025
     obsShape = [2, 13, 13]
     
     #logs

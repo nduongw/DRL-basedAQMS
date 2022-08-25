@@ -14,10 +14,10 @@ from src.Map import Map
 from src.Server import GNBServer
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--storepath', help='Location to store runs of tensorboard', required=True)
-parser.add_argument('--model', help='Dense or CNN model', required=True)
-parser.add_argument('--modelpath', help='Name of saved model state dict', required=False)
-parser.add_argument('--rewardfunc', help='Rerward version which you want to use', required=False)
+parser.add_argument('--storepath',type=str, help='Location to store runs of tensorboard', required=True)
+parser.add_argument('--model',type=str, help='Dense or CNN model', required=True)
+parser.add_argument('--modelpath',type=str, help='Name of saved model state dict', required=False)
+parser.add_argument('--rewardfunc',type=str, help='Rerward version which you want to use', required=False)
 args = parser.parse_args()
 
 #seed for model parameters
@@ -47,8 +47,8 @@ optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
 agent = Agent(model, target_model, optimizer, memory, device)
 
 server = GNBServer()
-map = Map(agent, server)
-testMap = Map(agent, server)
+map = Map(agent, server, args)
+testMap = Map(agent, server, args)
 map.set_seed(42)
 testMap.set_seed(42)
 testStep = 1
@@ -63,10 +63,16 @@ def testModel(testMap, testStep, step):
     writer.add_scalar('Reward', testMap.reward / 1000, testStep)
     print(f'Reward of testing phase; {testMap.reward / 1000}')
     testStep += 1
+    return testMap.reward / 1000
         
 if __name__ == "__main__":
+    
+    if not os.path.exists('models'):
+        os.mkdir('models')
+                
     # '''
     for i in tqdm(range(50000)):
+        bestReward = 0
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
         writer.add_scalar('Epsilon', epsilon, i)
@@ -85,15 +91,13 @@ if __name__ == "__main__":
         #save model
         if i % 50 == 0 and i != 0:
             agent.target_model.load_state_dict(agent.model.state_dict())
-            
-            if os.path.exists('model'):
-                torch.save(model.state_dict(), f'model/{args.model}-{args.modelpath}-atStep{i}.pth')
-            else:
-                os.mkdir('model')
 
         #testing phase
         if i % 100 == 0:
-            testModel(testMap, testStep, i)
+            reward = testModel(testMap, testStep, i)
+            if reward >= bestReward:
+                torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
+                bestReward = reward
             testStep += 1
     # '''
     # testModel(testMap, testStep, 1)        
