@@ -74,7 +74,7 @@ def testModel(testMap, testStep, step):
 if __name__ == "__main__":
     # '''
     for i in tqdm(range(50000)):
-        bestReward = 0
+        bestReward = -9999
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
         writer.add_scalar('Epsilon', epsilon, i)
@@ -98,6 +98,7 @@ if __name__ == "__main__":
         if i % 100 == 0:
             reward = testModel(testMap, testStep, i)
             if reward >= bestReward:
+                print(f'Reward increased from {bestReward} to {reward} => saving model...\n')
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
