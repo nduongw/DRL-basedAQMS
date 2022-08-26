@@ -130,6 +130,10 @@ class Map:
                 reward = calculateReward2(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
             elif self.args.rewardfunc == 'ver3':
                 reward = calculateReward3(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver4':
+                reward = calculateReward4(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver5':
+                reward = calculateReward5(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
             
             car.setReward(reward)
             totalReward += reward
