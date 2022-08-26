@@ -38,6 +38,10 @@ class Map:
             
             if isTest == False:
                 for car in self.carList:
+                    if car.state == Config.action["ON"]:
+                        self.carPosMap[car.x, car.y] = 2
+                    else:
+                        self.carPosMap[car.x, car.y] = 1
                     car.setNextObservation(self.coverMap, self.carPosMap)
                     memory.add([car.observation, car.state, car.reward, car.nextObservation])
             

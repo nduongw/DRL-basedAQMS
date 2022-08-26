@@ -13,6 +13,12 @@ from config import Config
 from src.Map import Map
 from src.Server import GNBServer
 
+if not os.path.exists('models'):
+    os.mkdir('models')
+        
+if not os.path.exists('runs'):
+    os.mkdir('runs')
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--storepath',type=str, help='Location to store runs of tensorboard', required=True)
 parser.add_argument('--model',type=str, help='Dense or CNN model', required=True)
@@ -66,13 +72,9 @@ def testModel(testMap, testStep, step):
     return testMap.reward / 1000
         
 if __name__ == "__main__":
-    
-    if not os.path.exists('models'):
-        os.mkdir('models')
-                
     # '''
     for i in tqdm(range(50000)):
-        bestReward = 0
+        bestReward = -9999
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
         writer.add_scalar('Epsilon', epsilon, i)
@@ -96,6 +98,7 @@ if __name__ == "__main__":
         if i % 100 == 0:
             reward = testModel(testMap, testStep, i)
             if reward >= bestReward:
+                print(f'Reward increased from {bestReward} to {reward} => saving model...\n')
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
