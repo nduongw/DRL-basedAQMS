@@ -63,18 +63,18 @@ def testModel(testMap, testStep, step):
     print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
-    for i in tqdm(range(1000)):
+    for i in tqdm(range(500)):
         testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep)
     
-    writer.add_scalar('Reward', testMap.reward / 1000, testStep)
-    print(f'Reward of testing phase; {testMap.reward / 1000}')
+    writer.add_scalar('Reward', testMap.reward / 500, testStep)
+    print(f'Reward of testing phase; {testMap.reward / 500}')
     testStep += 1
-    return testMap.reward / 1000
+    return testMap.reward / 500
         
 if __name__ == "__main__":
     # '''
+    bestReward = -9999
     for i in tqdm(range(50000)):
-        bestReward = -9999
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
         writer.add_scalar('Epsilon', epsilon, i)
@@ -87,7 +87,7 @@ if __name__ == "__main__":
             loss = agent.train(i, writer)
         
         if i % 20 == 0 and i != 0:
-            print(f'Step: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
+            print(f'\nStep: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
             loss = 0
 
         #save model
@@ -102,6 +102,8 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
+        
+        print('---------------------------------------\n')
     # '''
     # testModel(testMap, testStep, 1)        
     

@@ -13,8 +13,6 @@ class Map:
         self.coverMap = np.zeros([self.mapHeight, self.mapWidth])
         self.carPosMap = np.zeros([self.mapHeight, self.mapWidth])
         self.unCoverPeriod = Config.unCoverPeriod
-        self.onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
-        self.offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         self.server = server
         self.agent = agent
         self.time = 0
@@ -22,7 +20,9 @@ class Map:
         self.args = args
         
     def run(self, epsilon, writer, memory, step, isTest=False, testStep=0):
-        self.resetRewardMap()
+        onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
@@ -31,7 +31,7 @@ class Map:
                 car.action(self.server, epsilon)
             
             previousCoverMap = np.copy(self.coverMap)
-            self.updateCoverMap()
+            self.updateCoverMap(onRewardMap, offRewardMap)
             
             totalReward = self.calcReward(previousCoverMap)
             self.reward += totalReward
@@ -100,23 +100,23 @@ class Map:
         for car in self.carList:
             self.carPosMap[car.x, car.y] = 1
         
-    def updateCoverMap(self):
+    def updateCoverMap(self, onRewardMap, offRewardMap):
         for car in self.carList:
             if car.state == Config.action["ON"]:
-                self.setOnCover(car.x, car.y)
+                self.setOnCover(car.x, car.y, onRewardMap)
             else:
-                self.setOffCover(car.x, car.y)
+                self.setOffCover(car.x, car.y, offRewardMap)
         self.coverMap = np.where(self.onRewardMap >= 1, 1, self.coverMap)
         
-    def setOnCover(self, x, y):
+    def setOnCover(self, x, y, onRewardMap):
         for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
             for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
-                self.onRewardMap[i, j] += 1
+                onRewardMap[i, j] += 1
     
-    def setOffCover(self, x, y):
+    def setOffCover(self, x, y, offRewardMap):
         for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
             for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
-                self.offRewardMap[i, j] += 1
+                offRewardMap[i, j] += 1
                 
     def addCar(self, car):
         self.carList.append(car)
@@ -130,16 +130,16 @@ class Map:
                 reward = calculateReward2(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
             elif self.args.rewardfunc == 'ver3':
                 reward = calculateReward3(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver4':
+                reward = calculateReward4(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
+            elif self.args.rewardfunc == 'ver5':
+                reward = calculateReward5(car, self.onRewardMap, self.offRewardMap, self.coverMap, previousCoverMap)
             
             car.setReward(reward)
             totalReward += reward
 
         # totalReward /= len(self.carList)
         return totalReward
-
-    def resetRewardMap(self):
-        self.onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
-        self.offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
     
     def calcCoverRate(self):
         coverRate = self.coverMap.sum() / (self.mapHeight * self.mapWidth)
