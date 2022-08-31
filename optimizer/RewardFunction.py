@@ -71,12 +71,12 @@ def calculateReward3(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
     
     if car.state == Config.action["ON"]:
         reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() + \
-                np.where(offMap > 1, offMap - 1, 0).sum() - np.where(onMap > 1, onMap - 1, 0).sum()
-        reward /= (2 * denominator)
+                np.where(offMap > 1, 1, 0).sum() - np.where(onMap > 1, 1, 0).sum()
+        reward /= denominator
     else:
         reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() - \
-                np.where(offMap > 1, offMap - 1, 0).sum() + np.where(onMap > 1, onMap - 1, 0).sum()
-        reward /= (2 * denominator)
+                np.where(offMap > 1, 1, 0).sum() + np.where(onMap > 1, 1, 0).sum()
+        reward /= denominator
     
     return reward
 
@@ -101,11 +101,11 @@ def calculateReward4(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
     
     if car.state == Config.action["ON"]:
         reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() \
-                - np.where(onMap > 1, onMap - 1, 0).sum()
+                - np.where(onMap > 1, 1, 0).sum()
         reward /= denominator
     else:
         reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() - \
-                np.where(offMap > 1, offMap - 1, 0).sum()
+                np.where(offMap > 1, 1, 0).sum()
         reward /= denominator
     
     return reward
@@ -131,12 +131,12 @@ def calculateReward5(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
     
     if car.state == Config.action["ON"]:
         reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() + \
-                np.where(offMap > 1, offMap - 1, 0).sum()
+                np.where(offMap > 1, 1, 0).sum()
         reward /= denominator
     else:
         reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() \
-                + np.where(onMap > 1, onMap - 1, 0).sum()
-        reward /= (2 * denominator)
+                + np.where(onMap > 1, 1, 0).sum()
+        reward /= denominator
     
     return reward    
     

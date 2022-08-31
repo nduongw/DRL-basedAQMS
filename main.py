@@ -87,7 +87,7 @@ if __name__ == "__main__":
             loss = agent.train(i, writer)
         
         if i % 20 == 0 and i != 0:
-            print(f'Step: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
+            print(f'\nStep: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
             loss = 0
 
         #save model
@@ -102,6 +102,8 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
+        
+        print('---------------------------------------\n')
     # '''
     # testModel(testMap, testStep, 1)        
     
