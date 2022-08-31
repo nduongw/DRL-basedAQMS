@@ -56,10 +56,10 @@ server = GNBServer()
 map = Map(agent, server, args)
 testMap = Map(agent, server, args)
 map.set_seed(42)
-testMap.set_seed(42)
 testStep = 1
 
 def testModel(testMap, testStep, step):
+    testMap.set_seed(42)
     print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
@@ -74,9 +74,9 @@ def testModel(testMap, testStep, step):
 if __name__ == "__main__":
     # '''
     bestReward = -9999
-    for i in tqdm(range(50000)):
-        loss = 0
-        epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
+    minLoss = 999
+    for i in tqdm(range(10000)):
+        epsilon = max(0.01, 0.1 - 0.01 * (i / 100))
         writer.add_scalar('Epsilon', epsilon, i)
         
         #simulation phase
@@ -85,10 +85,14 @@ if __name__ == "__main__":
         #training phase
         if memory.size() > Config.batchSize:
             loss = agent.train(i, writer)
+            
+        if minLoss >= loss:
+            print(f'Loss decreased from {minLoss} to {loss} => saving model...\n')
+            torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-minLossAtStep{i}.pt')
+            minLoss = loss
         
         if i % 20 == 0 and i != 0:
             print(f'\nStep: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
-            loss = 0
 
         #save model
         if i % 50 == 0 and i != 0:

@@ -1,20 +1,20 @@
 class Config:
     #MapParameters
-    mapWidth = 100
-    mapHeight = 400
-    unCoverPeriod = 10
+    mapWidth = 50
+    mapHeight = 200
+    unCoverPeriod = 8
     
     state_size = 10
     action_size = 2
     minVelocity = 2
     maxVelocity = 7
-    coverRange = 10
+    coverRange = 8
     action = {
         "ON": 1,
         "OFF": 0
     }
     
-    generationAmount = 5
+    generationAmount = 4
     
     #OptimizerParameters
     bufferLimit = 1500000
