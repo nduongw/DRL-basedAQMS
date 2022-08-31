@@ -102,8 +102,6 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
-        
-        print('---------------------------------------\n')
     # '''
     # testModel(testMap, testStep, 1)        
     
