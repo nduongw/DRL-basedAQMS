@@ -22,26 +22,24 @@ class Map:
     def run(self, epsilon, writer, memory, step, isTest=False, testStep=0):
         onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
-        
+        totalReward = 0
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
-            
-            for car in self.carList:
                 car.action(self.server, epsilon)
-            
-            previousCoverMap = np.copy(self.coverMap)
-            self.updateCoverMap(onRewardMap, offRewardMap)
-            
-            totalReward = self.calcReward(previousCoverMap, onRewardMap, offRewardMap)
+                if car.state == Config.action["ON"]:
+                    self.carPosMap[car.x, car.y] = 2
+                else:
+                    self.carPosMap[car.x, car.y] = 1
+                previousCoverMap = np.copy(self.coverMap)
+                self.updateCoverMap(onRewardMap, offRewardMap)
+                self.calcReward(car, previousCoverMap, onRewardMap, offRewardMap)
+                totalReward += car.reward
+                
             self.reward += totalReward
             
             if isTest == False:
                 for car in self.carList:
-                    if car.state == Config.action["ON"]:
-                        self.carPosMap[car.x, car.y] = 2
-                    else:
-                        self.carPosMap[car.x, car.y] = 1
                     car.setNextObservation(self.coverMap, self.carPosMap)
                     memory.add([car.observation, car.state, car.reward, car.nextObservation])
             
@@ -121,25 +119,19 @@ class Map:
     def addCar(self, car):
         self.carList.append(car)
         
-    def calcReward(self, previousCoverMap, onRewardMap, offRewardMap):
-        totalReward = 0
-        for car in self.carList:
-            if self.args.rewardfunc == 'ver1':
-                reward = calculateReward(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
-            elif self.args.rewardfunc == 'ver2':
-                reward = calculateReward2(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
-            elif self.args.rewardfunc == 'ver3':
-                reward = calculateReward3(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
-            elif self.args.rewardfunc == 'ver4':
-                reward = calculateReward4(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
-            elif self.args.rewardfunc == 'ver5':
-                reward = calculateReward5(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
+    def calcReward(self, car, previousCoverMap, onRewardMap, offRewardMap):
+        if self.args.rewardfunc == 'ver1':
+            reward = calculateReward(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
+        elif self.args.rewardfunc == 'ver2':
+            reward = calculateReward2(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
+        elif self.args.rewardfunc == 'ver3':
+            reward = calculateReward3(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
+        elif self.args.rewardfunc == 'ver4':
+            reward = calculateReward4(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
+        elif self.args.rewardfunc == 'ver5':
+            reward = calculateReward5(car, onRewardMap, offRewardMap, self.coverMap, previousCoverMap)
             
-            car.setReward(reward)
-            totalReward += reward
-
-        # totalReward /= len(self.carList)
-        return totalReward
+        car.setReward(reward)
     
     def calcCoverRate(self):
         coverRate = self.coverMap.sum() / (self.mapHeight * self.mapWidth)

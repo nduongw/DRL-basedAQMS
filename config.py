@@ -1,7 +1,7 @@
 class Config:
     #MapParameters
-    mapWidth = 200
-    mapHeight = 500
+    mapWidth = 100
+    mapHeight = 400
     unCoverPeriod = 10
     
     state_size = 10
@@ -17,7 +17,7 @@ class Config:
     generationAmount = 5
     
     #OptimizerParameters
-    bufferLimit = 3000000
+    bufferLimit = 1500000
     batchSize = 32
     gamma = 0.98
     learningRate = 0.0025
