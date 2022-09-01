@@ -46,7 +46,7 @@ elif args.model == 'cnn':
 target_model.load_state_dict(model.state_dict())
 
 # for testing model
-# model.load_state_dict(torch.load('model/dense-238d17h21-atStep6000.pt'))
+model.load_state_dict(torch.load('models/dense-dense31t8-15h53-r5-bestRewardAtStep2100.pt'))
 
 memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
@@ -56,10 +56,10 @@ server = GNBServer()
 map = Map(agent, server, args)
 testMap = Map(agent, server, args)
 map.set_seed(42)
-testMap.set_seed(42)
 testStep = 1
 
 def testModel(testMap, testStep, step):
+    testMap.set_seed(42)
     print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
@@ -74,7 +74,8 @@ def testModel(testMap, testStep, step):
 if __name__ == "__main__":
     # '''
     bestReward = -9999
-    for i in tqdm(range(50000)):
+    minLoss = 999
+    for i in tqdm(range(10000)):
         loss = 0
         epsilon = max(0.01, 0.1 - 0.01 * (i / 200))
         writer.add_scalar('Epsilon', epsilon, i)
@@ -86,6 +87,11 @@ if __name__ == "__main__":
         if memory.size() > Config.batchSize:
             loss = agent.train(i, writer)
         
+        # if minLoss >= loss:
+        #     print(f'Loss decreased from {bestReward} to {reward} => saving model...\n')
+        #     torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}-minLossAtStep{i}.pt')
+        #     minLoss = loss
+            
         if i % 20 == 0 and i != 0:
             print(f'\nStep: {i}\tMemory size: {memory.size()}\tEpsilon : {epsilon: .2f}\tLoss: {loss: .5f}')
             loss = 0
