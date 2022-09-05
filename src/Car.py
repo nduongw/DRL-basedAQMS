@@ -53,7 +53,7 @@ class Car:
         
         prob = abs(random.uniform(0, 1))
         
-        if prob > 0.4:
+        if prob > 0.5:
             self.turnOn()
             package = Package(self.x, self.y)
             server.updateSentPackages(package)
