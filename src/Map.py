@@ -47,7 +47,7 @@ class Map:
                     carCoverMap = previousCoverMap[xStart: xEnd, yStart: yEnd]
                     carCoverMapPrime = self.coverMap[xStart: xEnd, yStart: yEnd]
     
-                    csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
+                    csvWriter.writerow([car.x, car.y, np.array(carCoverMap), car.state, np.array(carCoverMapPrime), car.reward])
                 totalReward += car.reward
                 
             self.reward += totalReward
@@ -169,8 +169,6 @@ class Map:
         overlapMap = onRewardMap - 1
         overlap = np.where(overlapMap > 0, 1, 0).sum()
         if self.countOnCar() != 0:
-            overlap /= (self.countOnCar() * (Config.coverRange * 2 + 1))
-            overlap /= (self.countOnCar() * (Config.coverRange * 2 + 1))        
             overlap /= (self.countOnCar() * (Config.coverRange * 2 + 1))
         else: 
             overlap = 0        

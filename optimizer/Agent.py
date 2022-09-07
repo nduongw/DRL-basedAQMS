@@ -20,7 +20,6 @@ class Agent:
         # print(self.memory.size()
         for _ in range(min(int(self.memory.size() / Config.batchSize), 50)):
             s, a, r, sPrime = self.memory.sample()
-            
             output = self.model(s)
             actualQ = output.gather(1, a.type(torch.int64))
             argMaxQPrime = self.model(sPrime).argmax(dim=1, keepdim=True)

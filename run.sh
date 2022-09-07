@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=1 python main.py --storepath dense6t9-00h30-r6-a2 --model dense --modelpath dense6t9-00h30-r6-a2 --rewardfunc ver6
+CUDA_VISIBLE_DEVICES=1 python main.py --storepath dense6t9-16h30-r5-a2 --model dense --modelpath dense6t9-16h30-r5-a2 --rewardfunc ver5

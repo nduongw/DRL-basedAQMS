@@ -12,7 +12,7 @@ class Car:
         self.x = x
         self.y = y
         self.agent = agent
-        self.velocity = 3
+        self.velocity = 1
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0
@@ -48,12 +48,12 @@ class Car:
         self.x = self.x + self.velocity
     
     def action(self, server, epsilon):
-        '''
+        # '''
         # * For random action:
         
         prob = abs(random.uniform(0, 1))
         
-        if prob > 0.5:
+        if prob > 0.95:
             self.turnOn()
             package = Package(self.x, self.y)
             server.updateSentPackages(package)
@@ -70,7 +70,7 @@ class Car:
             server.updateSentPackages(package)
         else :
             self.turnOff()
-        # ''' 
+        ''' 
     def set_seed(self, seed):
         np.random.seed(seed)
         random.seed(seed)
