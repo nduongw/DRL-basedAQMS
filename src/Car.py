@@ -54,7 +54,7 @@ class Car:
         self.x = self.x + self.velocity
             
     
-    def action(self, server, epsilon):
+    def action(self, server, epsilon, args):
         '''
         # * For random action:
         
@@ -69,7 +69,7 @@ class Car:
             self.turnOff()
             
         '''
-        action = self.agent.getAction(self.observation, epsilon)
+        action = self.agent.getAction(self.observation, epsilon, args)
         
         if action == 1:
             self.turnOn()

@@ -29,6 +29,7 @@ parser.add_argument('--model',type=str, help='Dense or CNN model', required=True
 parser.add_argument('--modelpath',type=str, help='Name of saved model state dict', required=False)
 parser.add_argument('--rewardfunc',type=str, help='Rerward version which you want to use', required=False)
 parser.add_argument('--config', type=int, help='Map parameters for running', required=False)
+parser.add_argument('--zoom', type=int, help='Zoom observation', required=True)
 args = parser.parse_args()
 
 #seed for model parameters

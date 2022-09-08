@@ -26,7 +26,7 @@ class Map:
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
-                car.action(self.server, epsilon)
+                car.action(self.server, epsilon, self.args)
                 if car.state == Config.action["ON"]:
                     self.carPosMap[car.x, car.y] = 222
                 else:

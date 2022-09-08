@@ -12,7 +12,7 @@ class DQNDenseModel(nn.Module):
         self.observationSpace = observationSpace
         
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(578, 256)
+        self.fc1 = nn.Linear(338, 256)
         self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 64)
         self.fc4 = nn.Linear(64, self.actionSpace)
