@@ -20,8 +20,8 @@ class Memory:
         
         for transition in miniBatch:
             s, a, r, sPrime = transition
-            s_t = T.Resize((13, 13))(torch.from_numpy(s)).numpy()
-            sPrime_t = T.Resize((13, 13))(torch.from_numpy(sPrime)).numpy()
+            s_t = T.Resize((17, 17))(torch.from_numpy(s)).numpy()
+            sPrime_t = T.Resize((17, 17))(torch.from_numpy(sPrime)).numpy()
             
             sLst.append(s_t / 255.0)
             aLst.append([a])

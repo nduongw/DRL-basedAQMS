@@ -28,6 +28,7 @@ parser.add_argument('--storepath',type=str, help='Location to store runs of tens
 parser.add_argument('--model',type=str, help='Dense or CNN model', required=True)
 parser.add_argument('--modelpath',type=str, help='Name of saved model state dict', required=False)
 parser.add_argument('--rewardfunc',type=str, help='Rerward version which you want to use', required=False)
+parser.add_argument('--config', type=int, help='Map parameters for running', required=False)
 args = parser.parse_args()
 
 #seed for model parameters
@@ -50,7 +51,7 @@ elif args.model == 'cnn':
 target_model.load_state_dict(model.state_dict())
 
 # for testing model
-model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
+# model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
 
 memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
@@ -76,7 +77,7 @@ def testModel(testMap, testStep, step, csvWriter):
     return testMap.reward / 500
         
 if __name__ == "__main__":
-    '''
+    # '''
     bestReward = -9999
     minLoss = 999
     loss = 999
@@ -125,7 +126,7 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}/bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
-    '''
-    testModel(testMap, testStep, 1, None)        
+    # '''
+    # testModel(testMap, testStep, 1, None)        
     
     writer.close()

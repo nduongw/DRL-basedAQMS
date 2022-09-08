@@ -47,7 +47,7 @@ class Map:
                     carCoverMap = previousCoverMap[xStart: xEnd, yStart: yEnd]
                     carCoverMapPrime = self.coverMap[xStart: xEnd, yStart: yEnd]
     
-                    csvWriter.writerow([car.x, car.y, np.array(carCoverMap), car.state, np.array(carCoverMapPrime), car.reward])
+                    csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
                 totalReward += car.reward
                 
             self.reward += totalReward
@@ -76,7 +76,7 @@ class Map:
                 writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
             
             for car in self.carList:
-                car.run()
+                car.run(step)
         
         if self.time % self.unCoverPeriod == 0 and self.time != 0:
             self.coverMap -= 1

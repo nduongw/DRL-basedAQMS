@@ -43,7 +43,7 @@ class Agent:
             
     def getAction(self, observation, epsilon):
         observation = torch.from_numpy(observation)
-        observation = T.Resize((13, 13))(observation).type(torch.float).to(self.device).unsqueeze(0)
+        observation = T.Resize((17, 17))(observation).type(torch.float).to(self.device).unsqueeze(0)
 
         qOut = self.model(observation)
         # print(qOut.is_cuda)
