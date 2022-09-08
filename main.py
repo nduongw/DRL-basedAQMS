@@ -50,7 +50,7 @@ elif args.model == 'cnn':
 target_model.load_state_dict(model.state_dict())
 
 # for testing model
-model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
+# model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
 
 memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
@@ -76,7 +76,7 @@ def testModel(testMap, testStep, step, csvWriter):
     return testMap.reward / 500
         
 if __name__ == "__main__":
-    '''
+    # '''
     bestReward = -9999
     minLoss = 999
     loss = 999
@@ -125,7 +125,7 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}/bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
-    '''
-    testModel(testMap, testStep, 1, None)        
+    # '''
+    # testModel(testMap, testStep, 1, None)        
     
     writer.close()

@@ -1,4 +1,4 @@
-class Config_1:
+class Config:
     #MapParameters
     mapWidth = 50
     mapHeight = 200
@@ -76,7 +76,7 @@ class Config_3:
     obsShape = [2, 13, 13]
     carVelocity = 5
     
-class Config:
+class Config_4:
     #MapParameters
     mapWidth = 50
     mapHeight = 200
@@ -98,6 +98,6 @@ class Config:
     bufferLimit = 1500000
     batchSize = 32
     gamma = 0.98
-    learningRate = 0.0025
+    learningRate = 0.0005
     obsShape = [2, 13, 13]
     carVelocity = 1
