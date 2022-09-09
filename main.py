@@ -40,7 +40,8 @@ writer = SummaryWriter(f'runs/{args.storepath}')
 # writer = SummaryWriter(f'runs/demo1')
 
 modelList = {'DenseModel': DQNDenseModel(2, Config.obsShape, device),
-             'CnnModel': DQNCNNModel(2, Config.obsShape, device)}
+             'CnnModel': DQNCNNModel(2, Config.obsShape, device),
+             'CnnModel2': DQNCNNModel2(2, Config.obsShape, device)}
 
 if args.model == 'dense':
     model = modelList['DenseModel'].to(device)
@@ -48,11 +49,15 @@ if args.model == 'dense':
 elif args.model == 'cnn':
     model = modelList['CnnModel'].to(device)    
     target_model = modelList['CnnModel'].to(device)
+elif args.model == 'cnn2':
+    model = modelList['CnnModel2'].to(device)    
+    target_model = modelList['CnnModel2'].to(device)
     
 target_model.load_state_dict(model.state_dict())
 
 # for testing model
 # model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
+# model.load_state_dict(torch.load('models/dense-dense9t9-00h00-r5-a2-zoom7/bestRewardAtStep8300.pt'))
 
 memory = Memory(device)
 optimizer = optim.Adam(model.parameters(), lr=Config.learningRate)
@@ -78,6 +83,9 @@ def testModel(testMap, testStep, step, csvWriter):
     return testMap.reward / 500
         
 if __name__ == "__main__":
+    totalParam = sum(p.numel() for p in model.parameters())
+    print(f'Total parameters of model: {totalParam}')
+    print('----------------------------------------------\n')
     # '''
     bestReward = -9999
     minLoss = 999
