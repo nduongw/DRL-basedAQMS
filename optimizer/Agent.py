@@ -56,7 +56,7 @@ class Agent:
         zoomObservation = np.stack([zoomCoverMap, zoomCarMap])
         zoomObservation = torch.from_numpy(zoomObservation)
         # print('Observation shape: ', zoomObservation.shape)
-        zoomObservation = T.Resize((21, 21))(zoomObservation).type(torch.float).to(self.device).unsqueeze(0)
+        zoomObservation = T.Resize((13, 13))(zoomObservation).type(torch.float).to(self.device).unsqueeze(0)
         # print('Observation after reshape: ', zoomObservation.shape)
         qOut = self.model(zoomObservation)
         # print(qOut.is_cuda)

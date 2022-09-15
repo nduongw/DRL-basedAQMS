@@ -12,7 +12,7 @@ class Car:
         self.x = x
         self.y = y
         self.agent = agent
-        self.velocity = 10
+        self.velocity = random.randint(Config.minVelocity, Config.maxVelocity)
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0
@@ -46,11 +46,11 @@ class Car:
         
     def run(self, timeStep):
         # if timeStep % 300 < 100:
-        #     self.x = self.x + int(self.velocity * 2)
+        #     self.x = self.x + int(self.velocity)
         # elif timeStep % 300  >= 100 and timeStep % 300 < 200:
         #     self.x = self.x + int(self.velocity / 2)
         # elif timeStep % 100  >= 200 and timeStep % 300 < 300:
-        #     self.x = self.x + int(self.velocity * 2)
+        #     self.x = self.x + int(self.velocity / 2)
         self.x = self.x + self.velocity
             
     
@@ -60,7 +60,7 @@ class Car:
         
         prob = abs(random.uniform(0, 1))
         
-        if prob > 0.5:
+        if prob > 0.75:
             self.turnOn()
             package = Package(self.x, self.y)
             server.updateSentPackages(package)

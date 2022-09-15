@@ -12,19 +12,17 @@ class DQNDenseModel(nn.Module):
         self.observationSpace = observationSpace
         
         self.flatten = nn.Flatten()
-        self.fc1 = nn.Linear(882, 512)
-        self.fc2 = nn.Linear(512, 256)
-        self.fc3 = nn.Linear(256, 128)
-        self.fc4 = nn.Linear(128, 64)
-        self.fc5 = nn.Linear(64, self.actionSpace)
+        self.fc1 = nn.Linear(338, 256)
+        self.fc2 = nn.Linear(256, 128)
+        self.fc3 = nn.Linear(128, 64)
+        self.fc4 = nn.Linear(64, self.actionSpace)
         
     def forward(self, obs):
         flattenLayer = self.flatten(obs)
         dense1 = F.relu(self.fc1(flattenLayer))
         dense2 = F.relu(self.fc2(dense1))
         dense3 = F.relu(self.fc3(dense2))
-        dense4 = F.relu(self.fc4(dense3))
-        output = self.fc5(dense4)
+        output = self.fc4(dense3)
         
         return output
     

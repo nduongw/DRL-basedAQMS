@@ -20,7 +20,7 @@ class Config:
     bufferLimit = 1500000
     batchSize = 32
     gamma = 0.98
-    learningRate = 0.0025
+    learningRate = 0.0005
     obsShape = [2, 17, 17]
     carVelocity = 10
     

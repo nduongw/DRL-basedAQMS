@@ -56,7 +56,7 @@ elif args.model == 'cnn2':
 target_model.load_state_dict(model.state_dict())
 
 # for testing model
-# model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
+model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
 # model.load_state_dict(torch.load('models/dense-dense9t9-00h00-r5-a2-zoom7/bestRewardAtStep8300.pt'))
 
 memory = Memory(device)
@@ -74,13 +74,13 @@ def testModel(testMap, testStep, step, csvWriter):
     print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
-    for i in tqdm(range(500)):
+    for i in tqdm(range(1500)):
         testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep, csvWriter=csvWriter)
     
-    writer.add_scalar('Reward', testMap.reward / 500, testStep)
-    print(f'Reward of testing phase; {testMap.reward / 500}')
+    writer.add_scalar('Reward', testMap.reward / 1500, testStep)
+    print(f'Reward of testing phase; {testMap.reward / 1500}')
     testStep += 1
-    return testMap.reward / 500
+    return testMap.reward / 1500
         
 if __name__ == "__main__":
     totalParam = sum(p.numel() for p in model.parameters())
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     if not os.path.exists(f'logs/{args.model}-{args.modelpath}'):
         os.mkdir(f'logs/{args.model}-{args.modelpath}')
     
-    for i in tqdm(range(10000)):
+    for i in tqdm(range(5000)):
         epsilon = max(0.01, 0.1 - 0.01 * (i / 100))
         writer.add_scalar('Epsilon', epsilon, i)
         
