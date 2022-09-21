@@ -1,4 +1,5 @@
 import torch.nn as nn
+import math
 
 def weight_histograms_conv2d(writer, step, weights, layer_number):
     weights_shape = weights.shape
@@ -28,3 +29,10 @@ def weight_histograms(writer, step, model):
         elif isinstance(layer, nn.Linear):
             weights = layer.weight
             weight_histograms_linear(writer, step, weights, layer_number)
+
+def objectiveFunction(x, Config):
+    answer = 0
+    for prob in x:
+        answer += prob * Config.cLambda * Config.mapHeight * Config.mapWidth
+    
+    return 1 - math.e ** (-answer)

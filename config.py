@@ -1,20 +1,20 @@
-class Config:
+class Config_7:
     #MapParameters
-    mapWidth = 50
-    mapHeight = 200
+    mapWidth = 200
+    mapHeight = 800
     unCoverPeriod = 3
     
     state_size = 10
     action_size = 2
     minVelocity = 2
     maxVelocity = 7
-    coverRange = 5
+    coverRange = 7
     action = {
         "ON": 1,
         "OFF": 0
     }
     
-    generationAmount = 5
+    generationAmount = 20
     
     #OptimizerParameters
     bufferLimit = 1500000
@@ -24,7 +24,7 @@ class Config:
     obsShape = [2, 17, 17]
     carVelocity = 10
     
-class Config_2:
+class Config:
     #MapParameters
     mapWidth = 50
     mapHeight = 200
@@ -49,6 +49,7 @@ class Config_2:
     learningRate = 0.0025
     obsShape = [2, 13, 13]
     carVelocity = 10
+    cLambda = 0.008
 
 class Config_3:
     #MapParameters

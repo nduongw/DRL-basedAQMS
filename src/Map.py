@@ -1,5 +1,7 @@
+from distutils.command.config import config
 import numpy as np
 import random
+import scipy.stats
 
 from config import Config
 from src.Car import Car
@@ -18,6 +20,8 @@ class Map:
         self.time = 0
         self.reward = 0
         self.args = args
+        self.coverRate = 0
+        self.sendingRate = 0
         
     def run(self, epsilon, writer, memory, step, isTest=False, testStep=0, csvWriter=None):
         onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
@@ -74,6 +78,8 @@ class Map:
                 writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(onRewardMap), step)
                 writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
                 writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
+                self.coverRate += self.calcCoverRate()
+                self.sendingRate += self.countOnCar() / len(self.carList)
             
             for car in self.carList:
                 car.run(step)
@@ -82,19 +88,38 @@ class Map:
             self.coverMap -= 1
             self.coverMap = np.where(self.coverMap > 0, self.coverMap, 0)
 
-        self.generateCar()
         self.removeInvalidCar()
+        self.generateCar(step)
         self.updateCarPosition()
 
         self.time += 1
         
-    def generateCar(self):
-        addedCarAmount = random.randint(0, Config.generationAmount)
+    def generateCar(self, timeStep):
+        addedCarAmount = self.generatePoissonDistribution(Config.cLambda, timeStep)
         
         for _ in range(addedCarAmount):
             addedCar = Car(random.randint(0, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent)
             addedCar.setObservation(self.coverMap, self.carPosMap)
             self.carList.append(addedCar)
+    
+    def generatePoissonDistribution(self, clambda, timeStep):
+        addedCarAmount = -1
+        currentCarAmount = np.where(self.carPosMap != 0, 1, 0).sum()
+        if timeStep == 0:
+            while addedCarAmount > (self.mapWidth * Config.carVelocity) or addedCarAmount < 0:
+                addedCarAmount = scipy.stats.poisson(self.mapHeight * self.mapWidth * clambda).rvs()
+
+            return addedCarAmount
+        
+        while addedCarAmount - currentCarAmount < 0 or addedCarAmount < 0:
+            addedCarAmount = scipy.stats.poisson(self.mapHeight * self.mapWidth * clambda).rvs()
+
+        return addedCarAmount - currentCarAmount
+
+    def generateFixedDistribution(self):
+        addedCarAmount = random.randint(0, Config.generationAmount)
+        
+        return addedCarAmount
         
     def removeInvalidCar(self):
         removeCarList = []

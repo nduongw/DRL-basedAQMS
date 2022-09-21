@@ -79,6 +79,8 @@ def testModel(testMap, testStep, step, csvWriter):
     
     writer.add_scalar('Reward', testMap.reward / 1500, testStep)
     print(f'Reward of testing phase; {testMap.reward / 1500}')
+    print(f'Sending rate of testing phase: {testMap.sendingRate / 1500}')
+    print(f'Cover rate at testing phase: {testMap.coverRate / 1500}')
     testStep += 1
     return testMap.reward / 1500
         
@@ -86,7 +88,7 @@ if __name__ == "__main__":
     totalParam = sum(p.numel() for p in model.parameters())
     print(f'Total parameters of model: {totalParam}')
     print('----------------------------------------------\n')
-    # '''
+    '''
     bestReward = -9999
     minLoss = 999
     loss = 999
@@ -135,7 +137,7 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), f'models/{args.model}-{args.modelpath}/bestRewardAtStep{i}.pt')
                 bestReward = reward
             testStep += 1
-    # '''
-    # testModel(testMap, testStep, 1, None)        
+    '''
+    testModel(testMap, testStep, 1, None)        
     
     writer.close()
