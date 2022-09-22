@@ -30,11 +30,21 @@ class Map:
         if len(self.carList) > 0:
             for car in self.carList:
                 car.setObservation(self.coverMap, self.carPosMap)
-                car.action(self.server, epsilon, self.args)
-                if car.state == Config.action["ON"]:
-                    self.carPosMap[car.x, car.y] = 222
+                if self.args.pso:
+                    if step % self.unCoverPeriod == 0:
+                        car.action(self.server, epsilon, self.args)
+                        if car.state == Config.action["ON"]:
+                            self.carPosMap[car.x, car.y] = 222
+                        else:
+                            self.carPosMap[car.x, car.y] = 1
+                    else:
+                        car.state = Config.action["OFF"]
                 else:
-                    self.carPosMap[car.x, car.y] = 1
+                    car.action(self.server, epsilon, self.args)
+                    if car.state == Config.action["ON"]:
+                        self.carPosMap[car.x, car.y] = 222
+                    else:
+                        self.carPosMap[car.x, car.y] = 1
                     
                 previousCoverMap = np.copy(self.coverMap)
                 self.updateCoverMap(car, onRewardMap, offRewardMap)
@@ -73,14 +83,24 @@ class Map:
             #         writer.add_image(f'[Test 100] Next observation map of car{car.x}-{car.y} at step:{step}', car.nextObservation[0], 0, dataformats='HW')
 
             if testStep != 0 and isTest == True:
-                writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
-                writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap, onRewardMap), step)
-                writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(onRewardMap), step)
-                writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
-                writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
-                self.coverRate += self.calcCoverRate()
-                self.sendingRate += self.countOnCar() / len(self.carList)
-            
+                if self.args.pso:
+                    if step % self.unCoverPeriod == 0:
+                        writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
+                        writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap, onRewardMap), step)
+                        writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(onRewardMap), step)
+                        writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
+                        writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
+                        self.coverRate += self.calcCoverRate()
+                        self.sendingRate += self.countOnCar() / len(self.carList)
+                else:
+                    writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
+                    writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap, onRewardMap), step)
+                    writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(onRewardMap), step)
+                    writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
+                    writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
+                    self.coverRate += self.calcCoverRate()
+                    self.sendingRate += self.countOnCar() / len(self.carList)
+                
             for car in self.carList:
                 car.run(step)
         

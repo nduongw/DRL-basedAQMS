@@ -2,8 +2,8 @@ import numpy as np
 import random
 
 from stuff import objectiveFunction
-from config import Config
-
+# from config import Config
+Config = 1
 class PSOBased:
     def __init__(self, outputDim, xMin, xMax, vMin, vMax, nbParticle, gBestValue, loopTimes, L1, epsilon, c1, wInit):
         self.outputDim = outputDim
@@ -57,5 +57,5 @@ class PSOBased:
         return self.gBest        
         
 if __name__ == "__main__":
-    pso = PSOBased(2, 0, 1, 0.2, -0.2, 10, 0, 1000, 10, 1e-8, 0, 0.8)
+    pso = PSOBased(1, 0, 1, 0.2, -0.2, 10, 0, 1000, 10, 1e-8, 0, 0.8)
     print(pso.optimizer())

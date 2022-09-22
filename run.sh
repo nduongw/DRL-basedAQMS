@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=2 python main.py --storepath testing-config2-model-poisson --model dense --modelpath dense-15t9-15h46-r5-zoom1 --rewardfunc ver5 --zoom 1
+CUDA_VISIBLE_DEVICES=1 python main.py --storepath testing-config2.1-pso-rerun2-poisson --model dense --modelpath dense-15t9-15h46-r5-zoom1 --rewardfunc ver5 --zoom 1 --testing True --sendingpercentage 0 --pso True

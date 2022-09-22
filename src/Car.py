@@ -55,29 +55,28 @@ class Car:
             
     
     def action(self, server, epsilon, args):
-        # '''
         # * For random action:
         
-        prob = abs(random.uniform(0, 1))
-        
-        if prob > 0.8917:
-            self.turnOn()
-            package = Package(self.x, self.y)
-            server.updateSentPackages(package)
+        if not args.usingmodel:
+            prob = abs(random.uniform(0, 1))
             
+            if prob > 1 - args.sendingpercentage:
+                self.turnOn()
+                package = Package(self.x, self.y)
+                server.updateSentPackages(package)
+                
+            else:
+                self.turnOff()
         else:
-            self.turnOff()
+            action = self.agent.getAction(self.observation, epsilon, args)
             
-        '''
-        action = self.agent.getAction(self.observation, epsilon, args)
-        
-        if action == 1:
-            self.turnOn()
-            package = Package(self.x, self.y)
-            server.updateSentPackages(package)
-        else :
-            self.turnOff()
-        ''' 
+            if action == 1:
+                self.turnOn()
+                package = Package(self.x, self.y)
+                server.updateSentPackages(package)
+            else :
+                self.turnOff()
+ 
     def set_seed(self, seed):
         np.random.seed(seed)
         random.seed(seed)

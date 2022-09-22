@@ -34,7 +34,7 @@ class Config:
     action_size = 2
     minVelocity = 2
     maxVelocity = 7
-    coverRange = 10
+    coverRange = 3
     action = {
         "ON": 1,
         "OFF": 0
