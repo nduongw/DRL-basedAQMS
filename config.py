@@ -24,7 +24,7 @@ class Config_7:
     obsShape = [2, 17, 17]
     carVelocity = 10
     
-class Config:
+class Config_2:
     #MapParameters
     mapWidth = 50
     mapHeight = 200
@@ -51,7 +51,7 @@ class Config:
     carVelocity = 10
     cLambda = 0.008
 
-class Config_3:
+class Config:
     #MapParameters
     mapWidth = 50
     mapHeight = 200
@@ -76,6 +76,8 @@ class Config_3:
     learningRate = 0.0025
     obsShape = [2, 13, 13]
     carVelocity = 5
+    cLambda = 0.008
+    
     
 class Config_4:
     #MapParameters

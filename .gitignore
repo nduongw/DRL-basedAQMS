@@ -9,6 +9,7 @@ runs/
 .vscode/
 models/
 logs/
+experiments/
 # C extensions
 *.so
 

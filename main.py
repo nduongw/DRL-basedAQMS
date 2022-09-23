@@ -1,5 +1,6 @@
 import torch
 import torch.optim as optim
+import os
 from torch.utils.tensorboard import SummaryWriter
 import csv
 from tqdm import tqdm
@@ -7,8 +8,8 @@ from tqdm import tqdm
 from optimizer.Model import *
 from optimizer.ReplayMemory import Memory
 from optimizer.Agent import Agent
-from config import Config
 from utils.stuff import *
+from config import Config
 
 from src.Map import Map
 from src.Server import GNBServer
@@ -54,17 +55,49 @@ map.set_seed(42)
 testStep = 1
 
 def testModel(testMap, testStep, step, csvWriter):
+    if not os.path.exists('experiments'):
+        os.mkdir('experiments')
+    
+    if not os.path.exists(f'experiments/{args.storepath}'):
+        os.mkdir(f'experiments/{args.storepath}')
+    
+    fCover = open(f'experiments/{args.storepath}/coverRate.csv', 'w')
+    fOverlap = open(f'experiments/{args.storepath}/overlap.csv', 'w')
+    fCarOverlap = open(f'experiments/{args.storepath}/carOverlap.csv', 'w')
+    fCarNumber = open(f'experiments/{args.storepath}/carNumber.csv', 'w')
+    fSendingRate = open(f'experiments/{args.storepath}/sendingRate.csv', 'w')
+                
+    csvWriterCover = csv.writer(fCover)
+    csvWriterOverlap = csv.writer(fOverlap)
+    csvWriterCarOverlap = csv.writer(fCarOverlap)
+    csvWriterCarNumber = csv.writer(fCarNumber)
+    csvWriterSendingRate = csv.writer(fSendingRate)
+    
+    csvWriterCover.writerow(['step', 'cover_rate'])
+    csvWriterOverlap.writerow(['step', 'overlap'])
+    csvWriterCarOverlap.writerow(['step', 'car_overlap'])
+    csvWriterCarNumber.writerow(['step', 'car_number'])
+    csvWriterSendingRate.writerow(['step', 'sending_rate'])
+    
     testMap.set_seed(42)
     print(f'Testing phase {step}:\n')
     testMap.resetMap()
     epsilon = 0
     for i in tqdm(range(1500)):
-        testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep, csvWriter=csvWriter)
+        testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep, \
+            csvWriter=csvWriter, csvWriterCover=csvWriterCover, csvWriterOverlap=csvWriterOverlap, csvWriterCarNumber=csvWriterCarNumber, csvWriterSendingRate=csvWriterSendingRate)
     
     writer.add_scalar('Reward', testMap.reward / 1500, testStep)
-    print(f'Reward of testing phase; {testMap.reward / 1500}')
-    print(f'Sending rate of testing phase: {testMap.sendingRate / 1500}')
-    print(f'Cover rate at testing phase: {testMap.coverRate / 1500}')
+    
+    if args.pso:
+        print(f'Reward of testing phase; {testMap.reward / (1500 / Config.unCoverPeriod)}')
+        print(f'Sending rate of testing phase: {testMap.sendingRate / (1500 / Config.unCoverPeriod)}')
+        print(f'Cover rate at testing phase: {testMap.coverRate / (1500 / Config.unCoverPeriod)}')
+    else:
+        print(f'Reward of testing phase; {testMap.reward / 1500}')
+        print(f'Sending rate of testing phase: {testMap.sendingRate / 1500}')
+        print(f'Cover rate at testing phase: {testMap.coverRate / 1500}')
+        
     testStep += 1
     return testMap.reward / 1500
         

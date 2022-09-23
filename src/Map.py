@@ -2,6 +2,7 @@ from distutils.command.config import config
 import numpy as np
 import random
 import scipy.stats
+import csv
 
 from config import Config
 from src.Car import Car
@@ -23,7 +24,8 @@ class Map:
         self.coverRate = 0
         self.sendingRate = 0
         
-    def run(self, epsilon, writer, memory, step, isTest=False, testStep=0, csvWriter=None):
+    def run(self, epsilon, writer, memory, step, isTest=False, testStep=0, \
+            csvWriter=None, csvWriterCover=None, csvWriterOverlap=None, csvWriterCarOverlap=None, csvWriterCarNumber=None, csvWriterSendingRate=None):
         onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         totalReward = 0
@@ -92,6 +94,13 @@ class Map:
                         writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
                         self.coverRate += self.calcCoverRate()
                         self.sendingRate += self.countOnCar() / len(self.carList)
+                        
+                        csvWriterCover.writerow([step, self.calcCoverRate()])
+                        csvWriterOverlap.writerow([step, self.calcOverlapRate(previousCoverMap, onRewardMap)])
+                        # csvWriterCarOverlap.writerow([step, self.calcCarOverlap(onRewardMap)])
+                        csvWriterCarNumber.writerow([step, len(self.carList)])
+                        csvWriterSendingRate.writerow([step, self.countOnCar() / len(self.carList)])
+                        
                 else:
                     writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
                     writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap, onRewardMap), step)
@@ -100,6 +109,12 @@ class Map:
                     writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
                     self.coverRate += self.calcCoverRate()
                     self.sendingRate += self.countOnCar() / len(self.carList)
+                    
+                    csvWriterCover.writerow([step, self.calcCoverRate()])
+                    csvWriterOverlap.writerow([step, self.calcOverlapRate(previousCoverMap, onRewardMap)])
+                    # csvWriterCarOverlap.writerow([step, self.calcCarOverlap(onRewardMap)])
+                    csvWriterCarNumber.writerow([step, len(self.carList)])
+                    csvWriterSendingRate.writerow([step, self.countOnCar() / len(self.carList)])
                 
             for car in self.carList:
                 car.run(step)
