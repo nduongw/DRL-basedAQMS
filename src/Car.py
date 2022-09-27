@@ -45,13 +45,15 @@ class Car:
         self.state = Config.action["OFF"]
         
     def run(self, timeStep):
-        # if timeStep % 300 < 100:
-        #     self.x = self.x + int(self.velocity)
-        # elif timeStep % 300  >= 100 and timeStep % 300 < 200:
-        #     self.x = self.x + int(self.velocity * 2)
-        # elif timeStep % 100  >= 200 and timeStep % 300 < 300:
-        #     self.x = self.x + int(self.velocity / 2)
-        self.x = self.x + self.velocity
+        if self.args.morningv:
+            if timeStep % 300 < 100:
+                self.x = self.x + int(self.args.morningv)
+            elif timeStep % 300  >= 100 and timeStep % 300 < 200:
+                self.x = self.x + int(self.args.afternoonv)
+            elif timeStep % 100  >= 200 and timeStep % 300 < 300:
+                self.x = self.x + int(self.args.evening)
+        else:
+            self.x = self.x + self.velocity
             
     
     def action(self, server, epsilon, args):

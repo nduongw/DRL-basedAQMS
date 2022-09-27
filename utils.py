@@ -54,6 +54,16 @@ def createOption():
     parser.add_argument('--testing', type=bool, help='Use this if you want to test your model', required=False)
     parser.add_argument('--usingmodel', type=bool, help='Use model or another algorithm to test', required=False)
     parser.add_argument('--sendingpercentage', type=float, help='Sending percentage to testing phase', required=False)
+    # for map parameters
+    parser.add_argument('--mapwidth', type=int, help='Map width', required=False)
+    parser.add_argument('--mapheight', type=int, help='Map Height', required=False)
+    parser.add_argument('--uncover', type=int, help='Time period when air quality doesn\'t change so much', required=False)
+    parser.add_argument('--generation', type=int, help='Car generation amount', required=False)
+    parser.add_argument('--coverrange', type=int, help='Cover range', required=False)
+    parser.add_argument('--morningv', type=int, help='Car\'s velocity in the morning', required=False)
+    parser.add_argument('--afternoonv', type=int, help='Car\'s velocity in the afternoon', required=False)
+    parser.add_argument('--eveningv', type=int, help='Car\'s velocity in the evening', required=False)
+    parser.add_argument('--clambda', type=int, help='Poisson distribution in a road', required=False)
     args = parser.parse_args()
     
     return args

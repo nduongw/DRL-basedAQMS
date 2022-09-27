@@ -17,6 +17,13 @@ from src.Server import GNBServer
 createFolder()
 args = createOption()
 
+Config.mapWidth = args.mapwidth
+Config.mapHeight = args.mapheight
+Config.unCoverPeriod = args.uncover
+Config.generationAmount = args.generation
+Config.coverRange = args.coverrange
+Config.cLambda = args.clambda
+
 #seed for model parameters
 torch.manual_seed(42)
 
