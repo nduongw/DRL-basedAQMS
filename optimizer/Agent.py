@@ -5,7 +5,7 @@ import torchvision.transforms as T
 import torch
 import random
 from config import Config
-from utils.stuff import *
+from utils import *
 
 class Agent:
     def __init__(self, model, target_model, optimizer, memory, device) -> None:

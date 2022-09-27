@@ -12,7 +12,7 @@ class Car:
         self.x = x
         self.y = y
         self.agent = agent
-        self.velocity = 10
+        self.velocity = 20
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0

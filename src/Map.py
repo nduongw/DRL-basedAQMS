@@ -41,6 +41,8 @@ class Map:
                             self.carPosMap[car.x, car.y] = 1
                     else:
                         car.state = Config.action["OFF"]
+                        self.carPosMap[car.x, car.y] = 1
+
                 else:
                     car.action(self.server, epsilon, self.args)
                     if car.state == Config.action["ON"]:
@@ -86,11 +88,11 @@ class Map:
 
             if testStep != 0 and isTest == True:
                 if self.args.pso:
+                    writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
                     if step % self.unCoverPeriod == 0:
                         writer.add_scalar(f'Cover rate at test step {testStep}', self.calcCoverRate(), step)
                         writer.add_scalar(f'Overlap rateat test step {testStep}', self.calcOverlapRate(previousCoverMap, onRewardMap), step)
                         writer.add_scalar(f'Car overlap rate at test step {testStep}', self.calcCarOverlap(onRewardMap), step)
-                        writer.add_scalar(f'Number of car at test step {testStep}', len(self.carList), step)
                         writer.add_scalar(f'Sending rate at test step {testStep}', self.countOnCar() / len(self.carList), step)
                         self.coverRate += self.calcCoverRate()
                         self.sendingRate += self.countOnCar() / len(self.carList)
@@ -133,11 +135,15 @@ class Map:
         addedCarAmount = self.generatePoissonDistribution(Config.cLambda, timeStep)
         
         for _ in range(addedCarAmount):
-            addedCar = Car(random.randint(0, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent)
+            if timeStep == 0:
+                addedCar = Car(random.randint(Config.minVelocity + Config.maxVelocity, Config.maxVelocity * 2), random.randint(0, self.mapWidth - 1), self.agent)
+            else:
+                addedCar = Car(random.randint(Config.minVelocity, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent)
             addedCar.setObservation(self.coverMap, self.carPosMap)
             self.carList.append(addedCar)
     
     def generatePoissonDistribution(self, clambda, timeStep):
+        count = 0
         addedCarAmount = -1
         currentCarAmount = np.where(self.carPosMap != 0, 1, 0).sum()
         if timeStep == 0:
@@ -148,7 +154,11 @@ class Map:
         
         while addedCarAmount - currentCarAmount < 0 or addedCarAmount < 0:
             addedCarAmount = scipy.stats.poisson(self.mapHeight * self.mapWidth * clambda).rvs()
-
+            count += 1
+            
+            if count == 1000:
+                return 0
+            
         return addedCarAmount - currentCarAmount
 
     def generateFixedDistribution(self):

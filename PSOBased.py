@@ -1,9 +1,18 @@
 import numpy as np
 import random
+import math
+from config import Config
 
-from stuff import objectiveFunction
-# from config import Config
-Config = 1
+def objectiveFunction(x, Config):
+    answer = 0
+    for prob in x:
+        answer += prob * Config.cLambda * Config.mapWidth * Config.mapHeight
+    
+    answer = 1 - math.e ** (-answer)
+    answer /= (5 + x.sum() + 0.2 * abs(x.sum()))
+    
+    return answer
+
 class PSOBased:
     def __init__(self, outputDim, xMin, xMax, vMin, vMax, nbParticle, gBestValue, loopTimes, L1, epsilon, c1, wInit):
         self.outputDim = outputDim
@@ -52,6 +61,7 @@ class PSOBased:
                 self.gBestValue = objectiveFunction(x[i], Config)
                 self.gBest = x[i]
         
+        print(f'Width: {Config.mapWidth} - Height: {Config.mapHeight} - Lambda: {Config.cLambda}')
         print(f'gBest: {self.gBest}')
         print(f'gBest value: {self.gBestValue}')
         return self.gBest        

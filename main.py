@@ -8,7 +8,7 @@ from tqdm import tqdm
 from optimizer.Model import *
 from optimizer.ReplayMemory import Memory
 from optimizer.Agent import Agent
-from utils.stuff import *
+from utils import *
 from config import Config
 
 from src.Map import Map
@@ -18,7 +18,7 @@ createFolder()
 args = createOption()
 
 #seed for model parameters
-torch.manual_seed(40)
+torch.manual_seed(42)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 writer = SummaryWriter(f'runs/{args.storepath}')
@@ -41,7 +41,7 @@ target_model.load_state_dict(model.state_dict())
 
 # for testing model
 if args.testing and args.usingmodel:
-    model.load_state_dict(torch.load('models/dense-dense6t9-14h30-r5-a2/bestRewardAtStep7000.pt'))
+    model.load_state_dict(torch.load('bestRewardAtStep7000.pt'))
 # model.load_state_dict(torch.load('models/dense-dense9t9-00h00-r5-a2-zoom7/bestRewardAtStep8300.pt'))
 
 memory = Memory(device)
@@ -85,7 +85,8 @@ def testModel(testMap, testStep, step, csvWriter):
     epsilon = 0
     for i in tqdm(range(1500)):
         testMap.run(epsilon, writer, memory, i, isTest=True, testStep=testStep, \
-            csvWriter=csvWriter, csvWriterCover=csvWriterCover, csvWriterOverlap=csvWriterOverlap, csvWriterCarNumber=csvWriterCarNumber, csvWriterSendingRate=csvWriterSendingRate)
+            csvWriter=csvWriter, csvWriterCover=csvWriterCover, csvWriterOverlap=csvWriterOverlap, \
+            csvWriterCarNumber=csvWriterCarNumber, csvWriterSendingRate=csvWriterSendingRate)
     
     writer.add_scalar('Reward', testMap.reward / 1500, testStep)
     
@@ -97,7 +98,13 @@ def testModel(testMap, testStep, step, csvWriter):
         print(f'Reward of testing phase; {testMap.reward / 1500}')
         print(f'Sending rate of testing phase: {testMap.sendingRate / 1500}')
         print(f'Cover rate at testing phase: {testMap.coverRate / 1500}')
-        
+    
+    fCover.close()
+    fOverlap.close()
+    fCarOverlap.close()
+    fCarNumber.close()
+    fSendingRate.close()
+    
     testStep += 1
     return testMap.reward / 1500
         

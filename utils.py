@@ -2,6 +2,7 @@ import torch.nn as nn
 import math
 import os
 import argparse
+from config import Config
 
 def weight_histograms_conv2d(writer, step, weights, layer_number):
     weights_shape = weights.shape
@@ -30,15 +31,6 @@ def weight_histograms(writer, step, model):
             weights = layer.weight
             weight_histograms_linear(writer, step, weights, layer_number)
 
-def objectiveFunction(x, Config):
-    answer = 0
-    for prob in x:
-        answer += prob * 0.008 * 200 * 50
-    
-    answer = 1 - math.e ** (-answer)
-    answer /= (5 + x.sum() + 0.2 * abs(x.sum()))
-    
-    return answer
 
 def createFolder():
     if not os.path.exists('models'):
