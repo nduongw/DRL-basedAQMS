@@ -132,7 +132,10 @@ class Map:
         self.time += 1
         
     def generateCar(self, timeStep):
-        addedCarAmount = self.generatePoissonDistribution(Config.cLambda, timeStep)
+        if self.args.poisson:
+            addedCarAmount = self.generatePoissonDistribution(Config.cLambda, timeStep)
+        else:
+            addedCarAmount = self.generateFixedDistribution()
         
         for _ in range(addedCarAmount):
             if timeStep == 0:

@@ -51,6 +51,7 @@ def createOption():
     parser.add_argument('--config', type=int, help='Map parameters for running', required=False)
     parser.add_argument('--zoom', type=int, help='Zoom observation', required=True)
     parser.add_argument('--pso', type=bool, help='Want to use PSO-Based algorithm or not', required=False)
+    parser.add_argument('--poisson', type=bool, help='Whether or not using poisson distribution', required=True)
     parser.add_argument('--testing', type=bool, help='Use this if you want to test your model', required=False)
     parser.add_argument('--usingmodel', type=bool, help='Use model or another algorithm to test', required=False)
     parser.add_argument('--sendingpercentage', type=float, help='Sending percentage to testing phase', required=False)
