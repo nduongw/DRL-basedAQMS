@@ -13,6 +13,21 @@ def objectiveFunction(x, Config):
     
     return answer
 
+def calcObjectiveFunction(map, prob, Config):
+    answer = 0
+    copyCovermap = np.zeros([Config.mapHeight, Config.mapWidth])
+    for car in map.carList:
+        map.setOnCover(car.x, car.y, copyCovermap)
+        coverArea = copyCovermap.sum()
+        answer += prob * Config.cLambda * coverArea
+        copyCovermap = np.zeros([Config.mapHeight, Config.mapWidth])
+    
+    answer = 1 - math.e ** (-answer)
+    answer /= (5 + prob + 0.2 * abs(prob))
+    
+    return answer   
+        
+
 class PSOBased:
     def __init__(self, outputDim, xMin, xMax, vMin, vMax, nbParticle, gBestValue, loopTimes, L1, epsilon, c1, wInit):
         self.outputDim = outputDim
@@ -29,14 +44,14 @@ class PSOBased:
         self.c1 = c1
         self.wInit = wInit
         
-    def optimizer(self):
+    def optimizer(self, map):
         self.gBestValue = 0
         x = np.random.rand(self.nbParticle, self.outputDim)
         v = np.zeros((self.nbParticle, self.outputDim))
         #khoi tao quan the ngau nhien
         for i in range(self.nbParticle):
-            if objectiveFunction(x[i], Config) > self.gBestValue:
-                self.gBestValue = objectiveFunction(x[i], Config)
+            if calcObjectiveFunction(map, x[i], Config) > self.gBestValue:
+                self.gBestValue = calcObjectiveFunction(map, x[i], Config)
                 self.gBest = x[i]
         
         for nbIterations in range(0, self.loopTimes):
@@ -57,13 +72,13 @@ class PSOBased:
                     x[i][j] = x[i][j] + v[i][j]
                     x[i][j] = max(min(x[i][j], self.xMax), self.xMin)
             
-            if objectiveFunction(x[i], Config) > self.gBestValue:
-                self.gBestValue = objectiveFunction(x[i], Config)
+            if calcObjectiveFunction(map, x[i], Config) > self.gBestValue:
+                self.gBestValue = calcObjectiveFunction(map, x[i], Config)
                 self.gBest = x[i]
         
-        print(f'Width: {Config.mapWidth} - Height: {Config.mapHeight} - Lambda: {Config.cLambda}')
-        print(f'gBest: {self.gBest}')
-        print(f'gBest value: {self.gBestValue}')
+        # print(f'Width: {Config.mapWidth} - Height: {Config.mapHeight} - Lambda: {Config.cLambda}')
+        # print(f'gBest: {self.gBest}')
+        # print(f'gBest value: {self.gBestValue}')
         return self.gBest        
         
 if __name__ == "__main__":

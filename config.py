@@ -221,15 +221,15 @@ class Config:
     #Map Parameters
     mapWidth = 50
     mapHeight = 400
-    unCoverPeriod = 15
-    generationAmount = 10
-    coverRange = 3
+    unCoverPeriod = 3
+    generationAmount = 5
+    coverRange = 5
     
     #Car Parameters
     state_size = 10
     action_size = 2
     minVelocity = 1
-    maxVelocity =20
+    maxVelocity = 1
     action = {
         "ON": 1,
         "OFF": 0

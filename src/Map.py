@@ -1,4 +1,3 @@
-from distutils.command.config import config
 import numpy as np
 import random
 import scipy.stats
@@ -7,6 +6,7 @@ import csv
 from config import Config
 from src.Car import Car
 from optimizer.RewardFunction import *
+from PSOBased import *
 
 class Map:
     def __init__(self, agent, server, args) -> None:
@@ -28,27 +28,69 @@ class Map:
             csvWriter=None, csvWriterCover=None, csvWriterOverlap=None, csvWriterCarOverlap=None, csvWriterCarNumber=None, csvWriterSendingRate=None):
         onRewardMap = np.zeros([self.mapHeight, self.mapWidth])
         offRewardMap = np.zeros([self.mapHeight, self.mapWidth])
+        psoBased = PSOBased(1, 0, 1, 0.2, -0.2, 10, 0, 1000, 10, 1e-8, 0, 0.8)
         totalReward = 0
+        
         if len(self.carList) > 0:
-            for car in self.carList:
-                car.setObservation(self.coverMap, self.carPosMap)
-                if self.args.pso:
-                    if step % self.unCoverPeriod == 0:
-                        car.action(self.server, epsilon, self.args)
+            if self.args.pso:
+                prob = 0
+                if step % self.unCoverPeriod == 0:
+                    prob = psoBased.optimizer(self)
+                    # print(f'PSO optimal probability: {prob}')
+                
+                    for car in self.carList:
+                        car.setObservation(self.coverMap, self.carPosMap)
+                        car.action(self.server, epsilon, self.args, prob[0])
                         if car.state == Config.action["ON"]:
                             self.carPosMap[car.x, car.y] = 222
                         else:
                             self.carPosMap[car.x, car.y] = 1
-                    else:
+                        
+                        previousCoverMap = np.copy(self.coverMap)
+                        self.updateCoverMap(car, onRewardMap, offRewardMap)
+                        self.coverMap = np.where(onRewardMap >= 1, 1, self.coverMap)
+                        car.setNextObservation(self.coverMap, self.carPosMap)
+                        self.calcReward(car, previousCoverMap, onRewardMap, offRewardMap)
+                        #Write to log file
+                        if csvWriter:
+                            xStart = max(0, car.x - Car.coverRange)
+                            xEnd = min(self.mapHeight, car.x + Car.coverRange + 1)
+                            yStart = max(0, car.y - Car.coverRange)
+                            yEnd = min(self.mapWidth, car.y + Car.coverRange + 1)
+                            
+                            carCoverMap = previousCoverMap[xStart: xEnd, yStart: yEnd]
+                            carCoverMapPrime = self.coverMap[xStart: xEnd, yStart: yEnd]
+            
+                            csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
+                        
+                else:
+                    for car in self.carList:
                         car.state = Config.action["OFF"]
                         self.carPosMap[car.x, car.y] = 1
+                        
+                        previousCoverMap = np.copy(self.coverMap)
+                        self.updateCoverMap(car, onRewardMap, offRewardMap)
+                        self.coverMap = np.where(onRewardMap >= 1, 1, self.coverMap)
+                        car.setNextObservation(self.coverMap, self.carPosMap)
+                        self.calcReward(car, previousCoverMap, onRewardMap, offRewardMap)
+                        #Write to log file
+                        if csvWriter:
+                            xStart = max(0, car.x - Car.coverRange)
+                            xEnd = min(self.mapHeight, car.x + Car.coverRange + 1)
+                            yStart = max(0, car.y - Car.coverRange)
+                            yEnd = min(self.mapWidth, car.y + Car.coverRange + 1)
+                            
+                            carCoverMap = previousCoverMap[xStart: xEnd, yStart: yEnd]
+                            carCoverMapPrime = self.coverMap[xStart: xEnd, yStart: yEnd]
+            
+                            csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
 
+            else:
+                car.action(self.server, epsilon, self.args, 0)
+                if car.state == Config.action["ON"]:
+                    self.carPosMap[car.x, car.y] = 222
                 else:
-                    car.action(self.server, epsilon, self.args)
-                    if car.state == Config.action["ON"]:
-                        self.carPosMap[car.x, car.y] = 222
-                    else:
-                        self.carPosMap[car.x, car.y] = 1
+                    self.carPosMap[car.x, car.y] = 1
                     
                 previousCoverMap = np.copy(self.coverMap)
                 self.updateCoverMap(car, onRewardMap, offRewardMap)
@@ -139,9 +181,9 @@ class Map:
         
         for _ in range(addedCarAmount):
             if timeStep == 0:
-                addedCar = Car(random.randint(Config.minVelocity + Config.maxVelocity, Config.maxVelocity * 2), random.randint(0, self.mapWidth - 1), self.agent)
+                addedCar = Car(random.randint(Config.minVelocity + Config.maxVelocity, Config.maxVelocity * 2), random.randint(0, self.mapWidth - 1), self.agent, self.args)
             else:
-                addedCar = Car(random.randint(Config.minVelocity, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent)
+                addedCar = Car(random.randint(Config.minVelocity, Config.maxVelocity), random.randint(0, self.mapWidth - 1), self.agent, self.args)
             addedCar.setObservation(self.coverMap, self.carPosMap)
             self.carList.append(addedCar)
     
