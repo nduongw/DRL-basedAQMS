@@ -8,15 +8,16 @@ class Car:
     coverRange = Config.coverRange
     observationRange = 2 * Config.coverRange
     
-    def __init__(self, x, y, agent) -> None:
+    def __init__(self, x, y, agent, args) -> None:
         self.x = x
         self.y = y
         self.agent = agent
-        self.velocity = 3
+        self.velocity = args.velocity
         self.state = Config.action["OFF"]
         self.observation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
         self.reward = 0
         self.nextObservation = np.zeros([2, 2 * Car.observationRange + 1, 2 * Car.observationRange + 1])
+        self.args = args
         
     def createObservation(self, coverMap, carMap):
         copyCarMap = copy(carMap)
@@ -44,33 +45,49 @@ class Car:
     def turnOff(self):
         self.state = Config.action["OFF"]
         
-    def run(self):
-        self.x = self.x + self.velocity
+    def run(self, timeStep):
+        if self.args.morningv:
+            if timeStep % 300 < 100:
+                self.x = self.x + int(self.args.morningv)
+            elif timeStep % 300  >= 100 and timeStep % 300 < 200:
+                self.x = self.x + int(self.args.afternoonv)
+            elif timeStep % 100  >= 200 and timeStep % 300 < 300:
+                self.x = self.x + int(self.args.evening)
+        else:
+            self.x = self.x + self.velocity
+            
     
-    def action(self, server, epsilon):
-        '''
+    def action(self, server, epsilon, args, optProb):
         # * For random action:
         
-        prob = abs(random.uniform(0, 1))
-        
-        if prob > 0.4:
-            self.turnOn()
-            package = Package(self.x, self.y)
-            server.updateSentPackages(package)
+        if not args.usingmodel:
+            prob = abs(random.uniform(0, 1))
+            
+            if not args.pso:
+                if prob > 1 - args.sendingpercentage:
+                    self.turnOn()
+                    package = Package(self.x, self.y)
+                    server.updateSentPackages(package)
+                else:
+                    self.turnOff()
+            else :
+                if prob > 1 - optProb:
+                    self.turnOn()
+                    package = Package(self.x, self.y)
+                    server.updateSentPackages(package)
+                else:
+                    self.turnOff()
             
         else:
-            self.turnOff()
+            action = self.agent.getAction(self.observation, epsilon, args)
             
-        '''
-        action = self.agent.getAction(self.observation, epsilon)
-        
-        if action == 1:
-            self.turnOn()
-            package = Package(self.x, self.y)
-            server.updateSentPackages(package)
-        else :
-            self.turnOff()
-        # ''' 
+            if action == 1:
+                self.turnOn()
+                package = Package(self.x, self.y)
+                server.updateSentPackages(package)
+            else :
+                self.turnOff()
+ 
     def set_seed(self, seed):
         np.random.seed(seed)
         random.seed(seed)

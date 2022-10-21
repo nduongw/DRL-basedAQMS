@@ -1,4 +1,3 @@
-from turtle import onrelease
 import numpy as np
 from config import Config
 from src.Car import Car
@@ -71,11 +70,11 @@ def calculateReward3(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
     
     if car.state == Config.action["ON"]:
         reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() + \
-                np.where(offMap > 1, 1, 0).sum() - np.where(onMap > 1, 1, 0).sum()
+                np.where(offMap > 1, offMap, 0).sum() - np.where(onMap > 1, onMap, 0).sum()
         reward /= denominator
     else:
         reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() - \
-                np.where(offMap > 1, 1, 0).sum() + np.where(onMap > 1, 1, 0).sum()
+                np.where(offMap > 1, offMap, 0).sum() + np.where(onMap > 1, onMap, 0).sum()
         reward /= denominator
     
     return reward
@@ -101,11 +100,11 @@ def calculateReward4(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
     
     if car.state == Config.action["ON"]:
         reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() \
-                - np.where(onMap > 1, 1, 0).sum()
+                - np.where(onMap > 1, onMap, 0).sum()
         reward /= denominator
     else:
         reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() - \
-                np.where(offMap > 1, 1, 0).sum()
+                np.where(offMap > 1, offMap, 0).sum()
         reward /= denominator
     
     return reward
@@ -139,6 +138,68 @@ def calculateReward5(car, onRewardMap, offRewardMap, coverMap, previousCoverMap)
         reward /= denominator
     
     return reward    
+
+def calculateReward6(car, onRewardMap, offRewardMap, coverMap, previousCoverMap):
+    '''
+    If action is turn on -> Reward = (Total uncover area - Total cover area + Total uncover area of another cars - Total cover area of another cars) / Cover range  
+    Else                 -> Reward = (Total cover area - Total uncover area - Total uncover area of another cars + Total cover area of another cars) / Cover range
+    '''
+    
+    paddedPreviousMap = np.pad(previousCoverMap, 2 * Config.coverRange, constant_values=-1)
+    paddedCoverMap = np.pad(coverMap, 2 * Config.coverRange, constant_values=-1)
+    paddedOnRewardMap = np.pad(onRewardMap, 2 * Config.coverRange, constant_values=-1)
+    paddedOffRewardMap = np.pad(offRewardMap, 2 * Config.coverRange, constant_values=-1)
+    
+    previousMap = paddedPreviousMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    presentMap = paddedCoverMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    onMap = paddedOnRewardMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    offMap = paddedOffRewardMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    
+    reward = 0
+    denominator = previousMap.shape[0] * previousMap.shape[1] - np.where(previousMap == -1, 1, 0).sum()
+    
+    if car.state == Config.action["ON"]:
+        reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum() + \
+                np.where(offMap > 1, offMap, 0).sum()
+        reward *= 1.5
+        reward /= denominator
+    else:
+        reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum() \
+                + np.where(onMap > 1, onMap, 0).sum()
+        reward *= 0.5
+        reward /= denominator
+    
+    return reward
+
+def calculateReward7(car, onRewardMap, offRewardMap, coverMap, previousCoverMap, carPosMap):
+    '''
+    If action is turn on -> Reward = (Total uncover area - Total cover area + Total uncover area of another cars - Total cover area of another cars) / Cover range  
+    Else                 -> Reward = (Total cover area - Total uncover area - Total uncover area of another cars + Total cover area of another cars) / Cover range
+    '''
+    
+    paddedPreviousMap = np.pad(previousCoverMap, 2 * Config.coverRange, constant_values=-1)
+    paddedCoverMap = np.pad(coverMap, 2 * Config.coverRange, constant_values=-1)
+    paddedOnRewardMap = np.pad(onRewardMap, 2 * Config.coverRange, constant_values=-1)
+    paddedOffRewardMap = np.pad(offRewardMap, 2 * Config.coverRange, constant_values=-1)
+    
+    previousMap = paddedPreviousMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    presentMap = paddedCoverMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    onMap = paddedOnRewardMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    offMap = paddedOffRewardMap[car.x + Config.coverRange: car.x + 3 * Config.coverRange + 1 , car.y + Config.coverRange: car.y + 3 * Config.coverRange + 1]
+    
+    
+    reward = 0
+    denominator = previousMap.shape[0] * previousMap.shape[1] - np.where(previousMap == -1, 1, 0).sum()
+    
+    if car.state == Config.action["ON"]:
+        reward = np.where(previousMap == 0, 1, 0).sum() - np.where(previousMap == 1, 1, 0).sum()
+        reward /= denominator
+    else:
+        reward = np.where(presentMap == 1, 1, 0).sum() - np.where(previousMap == 0, 1, 0).sum()
+        reward /= denominator
+    
+    return reward
+    
     
 if __name__ == "__main__":
     car = Car(22, 0, None)
