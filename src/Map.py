@@ -43,11 +43,11 @@ class Map:
                 else:
                     previousCoverMap = self.carInMapAction(epsilon, onRewardMap, offRewardMap, csvWriter, False)
             else:
-                previousCoverMap = self.carInMapAction(epsilon, onRewardMap, offRewardMap, True, csvWriter)
+                previousCoverMap = self.carInMapAction(epsilon, onRewardMap, offRewardMap, csvWriter, True)
             
             if isTest == False:
                 for car in self.carList:
-                    # car.setNextObservation(self.coverMap, self.carPosMap)
+                    car.setNextObservation(self.coverMap, self.carPosMap)
                     memory.add([car.observation, car.state, car.reward, car.nextObservation])
             
             # for car in self.carList:
@@ -162,18 +162,18 @@ class Map:
         
     def updateCoverMap(self, car, onRewardMap, offRewardMap):
         if car.state == Config.action["ON"]:
-            self.setOnCover(car.x, car.y, onRewardMap)
+            self.setOnCover(car.x, car.y, onRewardMap, car)
         else:
-            self.setOffCover(car.x, car.y, offRewardMap)
+            self.setOffCover(car.x, car.y, offRewardMap, car)
         
-    def setOnCover(self, x, y, onRewardMap):
-        for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
-            for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
+    def setOnCover(self, x, y, onRewardMap, car):
+        for i in range(max(0, x - car.coverRange), min(self.mapHeight, x + car.coverRange + 1)):
+            for j in range(max(0, y - car.coverRange), min(self.mapWidth, y + car.coverRange + 1)):
                 onRewardMap[i, j] += 1
     
-    def setOffCover(self, x, y, offRewardMap):
-        for i in range(max(0, x - Car.coverRange), min(self.mapHeight, x + Car.coverRange + 1)):
-            for j in range(max(0, y - Car.coverRange), min(self.mapWidth, y + Car.coverRange + 1)):
+    def setOffCover(self, x, y, offRewardMap, car):
+        for i in range(max(0, x - car.coverRange), min(self.mapHeight, x + car.coverRange + 1)):
+            for j in range(max(0, y - car.coverRange), min(self.mapWidth, y + car.coverRange + 1)):
                 offRewardMap[i, j] += 1
                 
     def addCar(self, car):
@@ -231,7 +231,7 @@ class Map:
         carCoverMap = previousCoverMap[xStart: xEnd, yStart: yEnd]
         carCoverMapPrime = self.coverMap[xStart: xEnd, yStart: yEnd]
 
-        csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
+        # csvWriter.writerow([car.x, car.y, np.where(carCoverMap == 0, 1, 0).sum(), car.state, np.where(carCoverMapPrime == 0, 1, 0).sum(), car.reward])
         
     def carInMapAction(self, epsilon, onRewardMap, offRewardMap, csvWriter, isPeriod, prob=0):
         totalReward = 0

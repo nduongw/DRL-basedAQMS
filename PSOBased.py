@@ -17,7 +17,7 @@ def calcObjectiveFunction(map, prob, Config):
     answer = 0
     copyCovermap = np.zeros([Config.mapHeight, Config.mapWidth])
     for car in map.carList:
-        map.setOnCover(car.x, car.y, copyCovermap)
+        map.setOnCover(car.x, car.y, copyCovermap, car)
         coverArea = copyCovermap.sum()
         answer += prob * Config.cLambda * coverArea
         copyCovermap = np.zeros([Config.mapHeight, Config.mapWidth])
